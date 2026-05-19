@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.mobil;
+import com.example.demo.model.Mobil;
 
-public class mobilController  extends mobil{
+public class mobilController  extends Mobil{
 
 }

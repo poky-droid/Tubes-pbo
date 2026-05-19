@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.motor;
+import com.example.demo.model.Motor;
 
-public class motorController extends motor {
+public class motorController extends Motor {
 
 }

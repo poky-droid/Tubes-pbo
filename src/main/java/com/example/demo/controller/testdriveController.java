@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.testdrive;
+import com.example.demo.model.Testdrive;
 
-public class testdriveController  extends testdrive{
+public class testdriveController  extends Testdrive{
 
 }
