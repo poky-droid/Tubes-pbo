@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AutoPrime – Profil Owner</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="/css/style1.css" rel="stylesheet"/>
+  <style>
+    .profile-banner {
+      height: 160px;
+      background: linear-gradient(135deg, #1a1200 0%, #2d1f00 40%, #0d0d0d 100%);
+      border-radius: 12px 12px 0 0;
+      position: relative;
+      border: 1px solid var(--dark-4);
+      border-bottom: none;
+    }
+    .profile-banner::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(201,168,76,.03) 20px, rgba(201,168,76,.03) 40px);
+      border-radius: 12px 12px 0 0;
+    }
+    .profile-avatar-wrap {
+      position: absolute;
+      bottom: -44px; left: 28px;
+    }
+    .profile-avatar {
+      width: 88px; height: 88px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), #8b5e2a);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Bebas Neue'; font-size: 36px; color: #000;
+      border: 4px solid var(--dark-3);
+    }
+  </style>
+</head>
+<body>
+<div id="sidebar"></div>
+<div id="main">
+  <div class="topbar">
+    <div class="topbar-title">Profil Owner</div>
+    <div class="topbar-right">
+      <button class="btn-gold" onclick="toggleEdit()"><i class="bi bi-pencil me-1"></i>Edit Profil</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="row g-4">
+
+      <!-- Profil Card -->
+      <div class="col-lg-4">
+        <div style="border-radius:12px;overflow:hidden;border:1px solid var(--dark-4)">
+          <div class="profile-banner">
+            <div class="profile-avatar-wrap">
+              <div class="profile-avatar">A</div>
+            </div>
+          </div>
+          <div style="background:var(--dark-3);padding:56px 24px 24px">
+            <div style="font-family:'Bebas Neue';font-size:22px;letter-spacing:1px">Admin Owner</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px"><i class="bi bi-shield-check me-1" style="color:var(--gold)"></i>Super Admin · Owner</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:6px"><i class="bi bi-envelope me-1"></i>owner@autoprime.id</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px"><i class="bi bi-telephone me-1"></i>0812-9999-8888</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px"><i class="bi bi-geo-alt me-1"></i>Tasikmalaya, Jawa Barat</div>
+            <hr style="border-color:var(--dark-4);margin:16px 0"/>
+            <div class="row g-2 text-center">
+              <div class="col-4">
+                <div style="font-family:'Bebas Neue';font-size:20px;color:var(--gold)">142</div>
+                <div style="font-size:10px;color:var(--muted)">Kendaraan</div>
+              </div>
+              <div class="col-4">
+                <div style="font-family:'Bebas Neue';font-size:20px;color:var(--green)">37</div>
+                <div style="font-size:10px;color:var(--muted)">Penjualan</div>
+              </div>
+              <div class="col-4">
+                <div style="font-family:'Bebas Neue';font-size:20px;color:var(--blue)">248</div>
+                <div style="font-size:10px;color:var(--muted)">Pembeli</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aksi Owner -->
+        <div class="card-c mt-3">
+          <div class="ch"><div class="sec-title">Aksi Owner</div></div>
+          <div class="cb d-flex flex-column gap-2">
+            <a href="penjualan.html" style="text-decoration:none">
+              <div style="background:var(--dark-4);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .2s" onmouseover="this.style.background='#333'" onmouseout="this.style.background='var(--dark-4)'">
+                <i class="bi bi-check2-square" style="color:var(--gold);font-size:16px"></i>
+                <div><div style="font-size:13px;font-weight:600">ACC / Tolak Permintaan</div><div style="font-size:11px;color:var(--muted)">9 permintaan menunggu</div></div>
+                <i class="bi bi-chevron-right ms-auto" style="color:var(--muted)"></i>
+              </div>
+            </a>
+            <a href="kendaraan.html" style="text-decoration:none">
+              <div style="background:var(--dark-4);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .2s" onmouseover="this.style.background='#333'" onmouseout="this.style.background='var(--dark-4)'">
+                <i class="bi bi-car-front-fill" style="color:var(--blue);font-size:16px"></i>
+                <div><div style="font-size:13px;font-weight:600">Kelola Kendaraan</div><div style="font-size:11px;color:var(--muted)">142 unit dalam stok</div></div>
+                <i class="bi bi-chevron-right ms-auto" style="color:var(--muted)"></i>
+              </div>
+            </a>
+            <a href="laporan.html" style="text-decoration:none">
+              <div style="background:var(--dark-4);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .2s" onmouseover="this.style.background='#333'" onmouseout="this.style.background='var(--dark-4)'">
+                <i class="bi bi-file-earmark-bar-graph-fill" style="color:var(--green);font-size:16px"></i>
+                <div><div style="font-size:13px;font-weight:600">Cetak Laporan</div><div style="font-size:11px;color:var(--muted)">Laporan transaksi & stok</div></div>
+                <i class="bi bi-chevron-right ms-auto" style="color:var(--muted)"></i>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Edit Profil -->
+      <div class="col-lg-8">
+        <div class="card-c mb-3">
+          <div class="ch"><div class="sec-title">Informasi Akun</div></div>
+          <div class="cb">
+            <div class="row g-3">
+              <div class="col-6">
+                <label class="lbl">Nama Lengkap</label>
+                <input class="form-c" value="Admin Owner" id="fNama" readonly/>
+              </div>
+              <div class="col-6">
+                <label class="lbl">Username</label>
+                <input class="form-c" value="@adminowner" id="fUser" readonly/>
+              </div>
+              <div class="col-6">
+                <label class="lbl">Email</label>
+                <input class="form-c" type="email" value="owner@autoprime.id" id="fEmail" readonly/>
+              </div>
+              <div class="col-6">
+                <label class="lbl">No. Telepon</label>
+                <input class="form-c" value="0812-9999-8888" id="fTelp" readonly/>
+              </div>
+              <div class="col-6">
+                <label class="lbl">Kota</label>
+                <input class="form-c" value="Tasikmalaya" id="fKota" readonly/>
+              </div>
+              <div class="col-6">
+                <label class="lbl">Provinsi</label>
+                <input class="form-c" value="Jawa Barat" id="fProv" readonly/>
+              </div>
+              <div class="col-12 edit-btn-row" style="display:none">
+                <button class="btn-gold" onclick="saveEdit()">Simpan Perubahan</button>
+                <button class="btn-red ms-2" onclick="cancelEdit()">Batal</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-c mb-3">
+          <div class="ch"><div class="sec-title">Keamanan Akun</div></div>
+          <div class="cb">
+            <div class="row g-3">
+              <div class="col-6">
+                <label class="lbl">Password Lama</label>
+                <input class="form-c" type="password" placeholder="••••••••"/>
+              </div>
+              <div class="col-6">
+                <label class="lbl">Password Baru</label>
+                <input class="form-c" type="password" placeholder="••••••••"/>
+              </div>
+              <div class="col-6">
+                <label class="lbl">Konfirmasi Password</label>
+                <input class="form-c" type="password" placeholder="••••••••"/>
+              </div>
+              <div class="col-12">
+                <button class="btn-gold">Update Password</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-c">
+          <div class="ch"><div class="sec-title">Log Aktivitas Owner</div></div>
+          <div class="cb">
+            <div class="act-item"><div class="act-dot green"></div><div><div class="act-text">ACC permintaan penjualan <b>#PJ-001</b> – Toyota Avanza</div><div class="act-time"><i class="bi bi-clock me-1"></i>19 Mei 2025 · 10:35</div></div></div>
+            <div class="act-item"><div class="act-dot red"></div><div><div class="act-text">Tolak permintaan penjualan <b>#PJ-006</b> – Honda Brio</div><div class="act-time"><i class="bi bi-clock me-1"></i>14 Mei 2025 · 14:12</div></div></div>
+            <div class="act-item"><div class="act-dot gold"></div><div><div class="act-text">Menambah kendaraan baru <b>Mitsubishi Pajero Sport 2023</b></div><div class="act-time"><i class="bi bi-clock me-1"></i>13 Mei 2025 · 09:20</div></div></div>
+            <div class="act-item"><div class="act-dot blue"></div><div><div class="act-text">Konfirmasi jadwal test drive <b>Honda CRV</b> – Farida Kusuma</div><div class="act-time"><i class="bi bi-clock me-1"></i>12 Mei 2025 · 16:45</div></div></div>
+            <div class="act-item"><div class="act-dot green"></div><div><div class="act-text">Cetak laporan transaksi bulan April 2025</div><div class="act-time"><i class="bi bi-clock me-1"></i>1 Mei 2025 · 08:00</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pg-footer mt-4">AUTOPRIME SHOWROOM MANAGEMENT &nbsp;·&nbsp; © 2025</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/sidebar.js"></script>
+<script>
+  renderSidebar('profil.html');
+
+  let editing = false;
+  const fields = ['fNama','fUser','fEmail','fTelp','fKota','fProv'];
+
+  function toggleEdit() {
+    editing = !editing;
+    fields.forEach(id => document.getElementById(id).removeAttribute(editing ? 'readonly' : ''));
+    if(editing) fields.forEach(id => document.getElementById(id).setAttribute('readonly',''));
+    fields.forEach(id => {
+      const el = document.getElementById(id);
+      if(editing) el.removeAttribute('readonly'); else el.setAttribute('readonly','');
+    });
+    document.querySelector('.edit-btn-row').style.display = editing ? '' : 'none';
+    document.querySelector('.topbar-right .btn-gold').innerHTML = editing
+      ? '<i class="bi bi-x me-1"></i>Batalkan'
+      : '<i class="bi bi-pencil me-1"></i>Edit Profil';
+  }
+
+  function saveEdit() {
+    fields.forEach(id => document.getElementById(id).setAttribute('readonly',''));
+    document.querySelector('.edit-btn-row').style.display = 'none';
+    document.querySelector('.topbar-right .btn-gold').innerHTML = '<i class="bi bi-pencil me-1"></i>Edit Profil';
+    editing = false;
+    alert('Profil berhasil disimpan!');
+  }
+  function cancelEdit() { editing = true; toggleEdit(); }
+</script>
+</body>
+</html>
