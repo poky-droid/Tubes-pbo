@@ -18,10 +18,10 @@ public class userController  extends User {
     public String DashboardRooting() {
         return "Dasboard";
     }
-    @RequestMapping( method=RequestMethod.GET, value = "/kendaraan")
-    public String kendaraan() {
-        return "kendaraan";
-    }
+    // @RequestMapping( method=RequestMethod.GET, value = "/kendaraan")
+    // public String kendaraan() {
+    //     return "kendaraan";
+    // }
 
     @RequestMapping( method=RequestMethod.GET, value = "/penjualan")
     public String penjualan() {

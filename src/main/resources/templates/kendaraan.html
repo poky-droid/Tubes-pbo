@@ -23,7 +23,6 @@
 
   <div class="content">
 
-    <!-- Filter bar -->
     <div class="d-flex gap-2 mb-4 flex-wrap">
       <button class="pill-tab active" data-filter="semua">Semua</button>
       <button class="pill-tab" data-filter="mobil">Mobil</button>
@@ -33,193 +32,205 @@
       <button class="pill-tab" data-filter="testdrive">Test Drive</button>
     </div>
 
-    <!-- Stats row -->
     <div class="row g-3 mb-4">
-      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon gold"><i class="bi bi-grid-fill"></i></div><div class="s-val">142</div><div class="s-label">Total Stok</div></div></div>
-      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon blue"><i class="bi bi-car-front-fill"></i></div><div class="s-val">90</div><div class="s-label">Mobil</div></div></div>
-      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon orange"><i class="bi bi-bicycle"></i></div><div class="s-val">52</div><div class="s-label">Motor</div></div></div>
-      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon green"><i class="bi bi-check-circle-fill"></i></div><div class="s-val">113</div><div class="s-label">Tersedia</div></div></div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="s-icon gold"><i class="bi bi-grid-fill"></i></div>
+          <div class="s-val" th:text="${totalStok}">0</div>
+          <div class="s-label">Total Stok</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="s-icon blue"><i class="bi bi-car-front-fill"></i></div>
+          <div class="s-val" th:text="${totalMobil}">0</div>
+          <div class="s-label">Mobil</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="s-icon orange"><i class="bi bi-bicycle"></i></div>
+          <div class="s-val" th:text="${totalMotor}">0</div>
+          <div class="s-label">Motor</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="s-icon green"><i class="bi bi-check-circle-fill"></i></div>
+          <div class="s-val" th:text="${totalTersedia}">0</div>
+          <div class="s-label">Tersedia</div>
+        </div>
+      </div>
     </div>
 
-    <!-- Kendaraan grid -->
     <div class="row g-3" id="kendaraanGrid">
-      <!-- Mobil -->
-      <div class="col-6 col-md-4 col-lg-3" data-type="mobil" data-status="tersedia">
+      
+      <div th:each="k : ${listKendaraan}" 
+           class="col-6 col-md-4 col-lg-3" 
+           th:attr="data-type=${k.jenis}, data-status=${#strings.toLowerCase(k.status)}">
+           
         <div class="v-card">
-          <div class="v-thumb">🚗</div>
+          <div class="v-thumb" th:text="${k.jenis == 'mobil' ? '🚗' : '🏍️'}"></div>
+          
           <div class="d-flex justify-content-between align-items-start">
-            <div><div class="v-brand">Toyota Avanza</div><div class="v-model">2023 · Matic · Merah</div></div>
-            <span class="b-status b-tersedia" style="white-space:nowrap">Tersedia</span>
+            <div>
+              <div class="v-brand" th:text="${k.merk}">Merk</div>
+              <div class="v-model" th:text="${#strings.substring(k.tahun, 0, 4)} + ' · ' + ${k.model}">Tahun · Model</div>
+            </div>
+            <span th:class="'b-status b-' + ${#strings.toLowerCase(#strings.replace(k.status, ' ', ''))}" 
+                  th:text="${k.status}">Status</span>
           </div>
-          <div class="v-price">Rp 248.000.000</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px"><i class="bi bi-fuel-pump me-1"></i>Bensin &nbsp;·&nbsp; <i class="bi bi-gear me-1"></i>Matic &nbsp;·&nbsp; 1.5L</div>
+          
+          <div class="v-price" th:text="'Rp ' + ${#numbers.formatDecimal(k.harga, 0, 'COMMA', 0, 'POINT')}">Harga</div>
+          
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">
+             <span th:if="${k.jenis == 'mobil'}">
+                <i class="bi bi-gear me-1"></i> Transmisi: <span th:text="${k.transmisi_mobil}"></span>
+             </span>
+             <span th:if="${k.jenis == 'motor'}">
+                <i class="bi bi-gear me-1"></i> Kapasitas: <span th:text="${k.cc} + ' cc'"></span>
+             </span>
+          </div>
+          
           <div class="d-flex gap-2 mt-3">
             <button class="btn-og flex-fill" style="font-size:11px;padding:5px 8px;">Detail</button>
-            <button class="btn-red flex-fill" style="font-size:11px;padding:5px 8px;">Hapus</button>
+            <a th:href="@{/kendaraan/hapus/{id}(id=${k.id_kendaraan})}" 
+                class="btn-red flex-fill" 
+                style="font-size:11px; padding:5px 8px; text-decoration:none; text-align:center;"
+                onclick="return confirm('Apakah Anda yakin ingin menghapus kendaraan ini?');">
+                Hapus
+            </a>
           </div>
         </div>
       </div>
-      <div class="col-6 col-md-4 col-lg-3" data-type="mobil" data-status="testdrive">
-        <div class="v-card">
-          <div class="v-thumb">🏎️</div>
-          <div class="d-flex justify-content-between align-items-start">
-            <div><div class="v-brand">Honda CRV</div><div class="v-model">2024 · Turbo · Putih</div></div>
-            <span class="b-status b-testdrive" style="white-space:nowrap">Test Drive</span>
-          </div>
-          <div class="v-price">Rp 580.000.000</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px"><i class="bi bi-fuel-pump me-1"></i>Bensin &nbsp;·&nbsp; <i class="bi bi-gear me-1"></i>Matic &nbsp;·&nbsp; 1.5T</div>
-          <div class="d-flex gap-2 mt-3">
-            <button class="btn-og flex-fill" style="font-size:11px;padding:5px 8px;">Detail</button>
-            <button class="btn-red flex-fill" style="font-size:11px;padding:5px 8px;">Hapus</button>
-          </div>
-        </div>
-      </div>
-      <div class="col-6 col-md-4 col-lg-3" data-type="mobil" data-status="tersedia">
-        <div class="v-card">
-          <div class="v-thumb">🛻</div>
-          <div class="d-flex justify-content-between align-items-start">
-            <div><div class="v-brand">Mitsubishi Pajero</div><div class="v-model">2023 · Sport · Hitam</div></div>
-            <span class="b-status b-tersedia" style="white-space:nowrap">Tersedia</span>
-          </div>
-          <div class="v-price">Rp 695.000.000</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px"><i class="bi bi-fuel-pump me-1"></i>Solar &nbsp;·&nbsp; <i class="bi bi-gear me-1"></i>Matic &nbsp;·&nbsp; 2.4L</div>
-          <div class="d-flex gap-2 mt-3">
-            <button class="btn-og flex-fill" style="font-size:11px;padding:5px 8px;">Detail</button>
-            <button class="btn-red flex-fill" style="font-size:11px;padding:5px 8px;">Hapus</button>
-          </div>
-        </div>
-      </div>
-      <div class="col-6 col-md-4 col-lg-3" data-type="mobil" data-status="terjual">
-        <div class="v-card">
-          <div class="v-thumb">🚙</div>
-          <div class="d-flex justify-content-between align-items-start">
-            <div><div class="v-brand">Suzuki XL7</div><div class="v-model">2024 · Alpha · Silver</div></div>
-            <span class="b-status b-terjual" style="white-space:nowrap">Terjual</span>
-          </div>
-          <div class="v-price">Rp 325.000.000</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px"><i class="bi bi-fuel-pump me-1"></i>Bensin &nbsp;·&nbsp; <i class="bi bi-gear me-1"></i>Matic &nbsp;·&nbsp; 1.5L</div>
-          <div class="d-flex gap-2 mt-3">
-            <button class="btn-og flex-fill" style="font-size:11px;padding:5px 8px;">Detail</button>
-            <button class="btn-red flex-fill" style="font-size:11px;padding:5px 8px;">Hapus</button>
-          </div>
-        </div>
-      </div>
-      <div class="col-6 col-md-4 col-lg-3" data-type="mobil" data-status="tersedia">
-        <div class="v-card">
-          <div class="v-thumb">🚐</div>
-          <div class="d-flex justify-content-between align-items-start">
-            <div><div class="v-brand">Toyota Innova</div><div class="v-model">2022 · Reborn · Putih</div></div>
-            <span class="b-status b-tersedia" style="white-space:nowrap">Tersedia</span>
-          </div>
-          <div class="v-price">Rp 420.000.000</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px"><i class="bi bi-fuel-pump me-1"></i>Solar &nbsp;·&nbsp; <i class="bi bi-gear me-1"></i>Manual &nbsp;·&nbsp; 2.0L</div>
-          <div class="d-flex gap-2 mt-3">
-            <button class="btn-og flex-fill" style="font-size:11px;padding:5px 8px;">Detail</button>
-            <button class="btn-red flex-fill" style="font-size:11px;padding:5px 8px;">Hapus</button>
-          </div>
-        </div>
-      </div>
-      <!-- Motor -->
-      <div class="col-6 col-md-4 col-lg-3" data-type="motor" data-status="tersedia">
-        <div class="v-card">
-          <div class="v-thumb">🏍️</div>
-          <div class="d-flex justify-content-between align-items-start">
-            <div><div class="v-brand">Yamaha NMAX</div><div class="v-model">2024 · 155cc · Biru</div></div>
-            <span class="b-status b-tersedia" style="white-space:nowrap">Tersedia</span>
-          </div>
-          <div class="v-price">Rp 34.000.000</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px"><i class="bi bi-fuel-pump me-1"></i>Bensin &nbsp;·&nbsp; <i class="bi bi-gear me-1"></i>Matic &nbsp;·&nbsp; 155cc</div>
-          <div class="d-flex gap-2 mt-3">
-            <button class="btn-og flex-fill" style="font-size:11px;padding:5px 8px;">Detail</button>
-            <button class="btn-red flex-fill" style="font-size:11px;padding:5px 8px;">Hapus</button>
-          </div>
-        </div>
-      </div>
-      <div class="col-6 col-md-4 col-lg-3" data-type="motor" data-status="testdrive">
-        <div class="v-card">
-          <div class="v-thumb">🏍️</div>
-          <div class="d-flex justify-content-between align-items-start">
-            <div><div class="v-brand">Honda CBR</div><div class="v-model">2023 · 150R · Merah</div></div>
-            <span class="b-status b-testdrive" style="white-space:nowrap">Test Drive</span>
-          </div>
-          <div class="v-price">Rp 42.000.000</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px"><i class="bi bi-fuel-pump me-1"></i>Bensin &nbsp;·&nbsp; <i class="bi bi-gear me-1"></i>Manual &nbsp;·&nbsp; 150cc</div>
-          <div class="d-flex gap-2 mt-3">
-            <button class="btn-og flex-fill" style="font-size:11px;padding:5px 8px;">Detail</button>
-            <button class="btn-red flex-fill" style="font-size:11px;padding:5px 8px;">Hapus</button>
-          </div>
-        </div>
-      </div>
-      <div class="col-6 col-md-4 col-lg-3" data-type="motor" data-status="tersedia">
-        <div class="v-card">
-          <div class="v-thumb">🛵</div>
-          <div class="d-flex justify-content-between align-items-start">
-            <div><div class="v-brand">Honda Vario</div><div class="v-model">2024 · 160 · Hitam</div></div>
-            <span class="b-status b-tersedia" style="white-space:nowrap">Tersedia</span>
-          </div>
-          <div class="v-price">Rp 28.500.000</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px"><i class="bi bi-fuel-pump me-1"></i>Bensin &nbsp;·&nbsp; <i class="bi bi-gear me-1"></i>Matic &nbsp;·&nbsp; 160cc</div>
-          <div class="d-flex gap-2 mt-3">
-            <button class="btn-og flex-fill" style="font-size:11px;padding:5px 8px;">Detail</button>
-            <button class="btn-red flex-fill" style="font-size:11px;padding:5px 8px;">Hapus</button>
-          </div>
-        </div>
-      </div>
+      
     </div>
 
     <div class="pg-footer mt-4">AUTOPRIME SHOWROOM MANAGEMENT &nbsp;·&nbsp; © 2025</div>
   </div>
 </div>
 
-<!-- Modal Tambah Kendaraan -->
 <div class="modal-overlay" id="modalTambah">
   <div class="modal-box">
     <div class="modal-title">Tambah Kendaraan</div>
-    <div class="row g-3">
-      <div class="col-6"><label class="lbl">Jenis</label><select class="form-c"><option>Mobil</option><option>Motor</option></select></div>
-      <div class="col-6"><label class="lbl">Merk</label><input class="form-c" placeholder="Toyota, Honda, ..."/></div>
-      <div class="col-6"><label class="lbl">Model</label><input class="form-c" placeholder="Avanza, CBR, ..."/></div>
-      <div class="col-6"><label class="lbl">Tahun</label><input class="form-c" type="number" placeholder="2024"/></div>
-      <div class="col-6"><label class="lbl">Harga (Rp)</label><input class="form-c" type="number" placeholder="250000000"/></div>
-      <div class="col-6"><label class="lbl">Status</label><select class="form-c"><option>Tersedia</option><option>Test Drive</option><option>Terjual</option></select></div>
-      <div class="col-12"><label class="lbl">Warna</label><input class="form-c" placeholder="Merah, Putih, Hitam, ..."/></div>
-    </div>
-    <div class="d-flex gap-2 mt-4 justify-content-end">
-      <button class="btn-red" onclick="closeModal()">Batal</button>
-      <button class="btn-gold">Simpan Kendaraan</button>
-    </div>
+    
+    <form action="/kendaraan/tambah" method="POST">
+      <div class="row g-3">
+        <div class="col-6">
+          <label class="lbl">Jenis</label>
+          <select name="jenisKendaraan" class="form-c">
+            <option value="Mobil">Mobil</option>
+            <option value="Motor">Motor</option>
+          </select>
+        </div>
+        <div class="col-6">
+          <label class="lbl">Merk</label>
+          <input name="merk" class="form-c" placeholder="Toyota, Honda, ..." required/>
+        </div>
+        <div class="col-6">
+          <label class="lbl">Model</label>
+          <input name="model" class="form-c" placeholder="Avanza, CBR, ..." required/>
+        </div>
+        <div class="col-6">
+          <label class="lbl">Tahun</label>
+          <input name="tahun" class="form-c" type="number" placeholder="2024" required/>
+        </div>
+        <div class="col-6">
+          <label class="lbl">Harga (Rp)</label>
+          <input name="harga" class="form-c" type="number" placeholder="250000000" required/>
+        </div>
+        <div class="col-6">
+          <label class="lbl">Status</label>
+          <select name="status" class="form-c">
+            <option value="Tersedia">Tersedia</option>
+            <option value="Test Drive">Test Drive</option>
+            <option value="Terjual">Terjual</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="lbl">Warna</label>
+          <input name="warna" class="form-c" placeholder="Merah, Putih, Hitam, ..."/>
+        </div>
+      </div>
+      <div class="d-flex gap-2 mt-4 justify-content-end">
+        <button type="button" class="btn-red" onclick="closeModal()">Batal</button>
+        <button type="submit" class="btn-gold">Simpan Kendaraan</button>
+      </div>
+    </form>
+    
   </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/js/sidebar.js"></script>
 <script>
+  // Merender sidebar (sesuaikan dengan kode aslimu)
   renderSidebar('kendaraan.html');
 
-  // Filter
-  document.querySelectorAll('[data-filter]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const f = btn.dataset.filter;
-      document.querySelectorAll('#kendaraanGrid [data-type]').forEach(card => {
-        const show = f === 'semua' || card.dataset.type === f || card.dataset.status === f;
-        card.style.display = show ? '' : 'none';
+  // --- LOGIKA PENCARIAN & FILTER ---
+  const searchInput = document.getElementById('searchInput');
+  const filterButtons = document.querySelectorAll('.pill-tab');
+  
+  // Mengambil semua kotak kendaraan yang di-generate oleh Thymeleaf
+  const vehicleCards = document.querySelectorAll('#kendaraanGrid > div');
+
+  // Menyimpan status filter saat ini
+  let currentFilter = 'semua';
+  let currentSearch = '';
+
+  // Fungsi utama untuk menyaring kartu kendaraan
+  function applyFilters() {
+    vehicleCards.forEach(card => {
+      // Ambil data dari atribut HTML
+      const type = card.getAttribute('data-type');
+      const status = card.getAttribute('data-status');
+      
+      // Ambil seluruh teks di dalam kartu (Merk, Model, Harga, dll)
+      const cardText = card.innerText.toLowerCase();
+
+      // 1. Cek apakah kartu cocok dengan Tab Filter
+      const matchFilter = (currentFilter === 'semua') || 
+                          (type === currentFilter) || 
+                          (status === currentFilter);
+
+      // 2. Cek apakah kartu mengandung kata kunci Pencarian
+      const matchSearch = cardText.includes(currentSearch);
+
+      // Jika cocok di KEDUANYA (Filter & Search), tampilkan. Jika tidak, sembunyikan.
+      if (matchFilter && matchSearch) {
+        card.style.display = ''; // Tampilkan elemen
+      } else {
+        card.style.display = 'none'; // Sembunyikan elemen
+      }
+    });
+  }
+
+  // Event saat pengguna mengetik di kolom pencarian
+  if(searchInput) {
+      searchInput.addEventListener('input', function() {
+        currentSearch = this.value.toLowerCase();
+        applyFilters();
       });
+  }
+
+  // Event saat pengguna mengklik tab filter (Semua, Mobil, Motor, Tersedia, dll)
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Hapus status 'active' dari semua tombol, lalu aktifkan tombol yang diklik
+      filterButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      // Update nilai filter saat ini dan jalankan fungsi penyaringan
+      currentFilter = btn.getAttribute('data-filter');
+      applyFilters();
     });
   });
 
-  // Search
-  document.getElementById('searchInput').addEventListener('input', function() {
-    const q = this.value.toLowerCase();
-    document.querySelectorAll('#kendaraanGrid [data-type]').forEach(card => {
-      card.style.display = card.innerText.toLowerCase().includes(q) ? '' : 'none';
-    });
-  });
-
+  // Logika untuk Modal Tambah (Tetap sama seperti milikmu)
   function openModal()  { document.getElementById('modalTambah').classList.add('show'); }
   function closeModal() { document.getElementById('modalTambah').classList.remove('show'); }
-  document.getElementById('modalTambah').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+  document.getElementById('modalTambah').addEventListener('click', e => { 
+      if(e.target === e.currentTarget) closeModal(); 
+  });
 </script>
 </body>
 </html>

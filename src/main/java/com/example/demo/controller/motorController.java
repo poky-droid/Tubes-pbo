@@ -1,7 +1,8 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.Motor;
+import org.springframework.stereotype.Controller;
 
-public class motorController extends Motor {
-
+@Controller
+public class motorController {
+    // Biarkan kosong dulu jika belum ada fungsi khusus motor
 }
