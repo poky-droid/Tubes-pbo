@@ -14,10 +14,10 @@ public class userController  extends User {
         return "index";
     }
 
-    @RequestMapping(method=RequestMethod.GET, value = "/Dashboard")
-    public String DashboardRooting() {
-        return "Dasboard";
-    }
+    // @RequestMapping(method=RequestMethod.GET, value = "/Dashboard")
+    // public String DashboardRooting() {
+    //     return "Dasboard";
+    // }
     // @RequestMapping( method=RequestMethod.GET, value = "/kendaraan")
     // public String kendaraan() {
     //     return "kendaraan";

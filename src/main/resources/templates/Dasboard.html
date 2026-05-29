@@ -23,42 +23,44 @@
     </div>
   </div>
 
-  <div class="content">
-
-    <!-- Stat Cards -->
-    <div class="row g-3 mb-4">
-      <div class="col-6 col-xl-3">
+<div class="row g-3 mb-4">
+      
+      <div class="col-6 col-md-3">
         <div class="stat-card">
           <div class="s-icon gold"><i class="bi bi-car-front-fill"></i></div>
-          <div class="s-val">142</div>
+          <div class="s-val h2" th:text="${totalKendaraan}">0</div>
           <div class="s-label">Total Kendaraan</div>
-          <div class="s-change up"><i class="bi bi-arrow-up-short"></i> +8 bulan ini</div>
+          <div class="s-subtext text-success">↑ +8 bulan ini</div>
         </div>
       </div>
-      <div class="col-6 col-xl-3">
+
+      <div class="col-6 col-md-3">
         <div class="stat-card">
           <div class="s-icon green"><i class="bi bi-bag-check-fill"></i></div>
-          <div class="s-val">37</div>
+          <div class="s-val h2" th:text="${penjualanBulanIni}">0</div>
           <div class="s-label">Penjualan Bulan Ini</div>
-          <div class="s-change up"><i class="bi bi-arrow-up-short"></i> +12% vs kemarin</div>
+          <div class="s-subtext text-success">↑ +12% vs kemarin</div>
         </div>
       </div>
-      <div class="col-6 col-xl-3">
+
+      <div class="col-6 col-md-3">
         <div class="stat-card">
           <div class="s-icon blue"><i class="bi bi-key-fill"></i></div>
-          <div class="s-val">14</div>
+          <div class="s-val h2" th:text="${testDriveAktif}">0</div>
           <div class="s-label">Test Drive Aktif</div>
-          <div class="s-change up"><i class="bi bi-arrow-up-short"></i> +3 hari ini</div>
+          <div class="s-subtext text-success">↑ +3 hari ini</div>
         </div>
       </div>
-      <div class="col-6 col-xl-3">
+
+      <div class="col-6 col-md-3">
         <div class="stat-card">
           <div class="s-icon red"><i class="bi bi-clock-history"></i></div>
-          <div class="s-val">9</div>
+          <div class="s-val h2" th:text="${permintaanPending}">0</div>
           <div class="s-label">Permintaan Pending</div>
-          <div class="s-change down"><i class="bi bi-arrow-down-short"></i> -2 dari kemarin</div>
+          <div class="s-subtext text-danger">↓ -2 dari kemarin</div>
         </div>
       </div>
+
     </div>
 
     <!-- Chart + Aktivitas -->
@@ -77,48 +79,85 @@
           </div>
           <div class="cb">
             <div style="color:var(--gold);font-family:'Bebas Neue';font-size:26px;margin-bottom:16px;">
-              Rp 4.730.000.000
-              <span style="font-size:14px;color:var(--green);font-family:'DM Sans'">▲ 18% vs periode lalu</span>
+              Rp <span th:text="${#numbers.formatDecimal(totalPendapatan6Bulan, 0, 'COMMA', 0, 'POINT')}">0</span>
+              <span style="font-size:14px; font-family:'DM Sans'"
+                    th:styleappend="${isPertumbuhanPositif} ? 'color:var(--green)' : 'color:var(--red)'">
+                    
+                    <!-- Menampilkan panah atas/bawah secara otomatis -->
+                    <span th:text="${isPertumbuhanPositif} ? '▲' : '▼'"></span> 
+                    
+                    <!-- Menampilkan angka persentasenya -->
+                    <span th:text="${persentasePertumbuhan} + '% vs periode lalu'"></span>
+              </span>
             </div>
+            
             <div class="chart-bar-wrap">
-              <div class="chart-bar" style="height:40%"></div>
-              <div class="chart-bar" style="height:55%"></div>
-              <div class="chart-bar" style="height:70%"></div>
-              <div class="chart-bar" style="height:50%"></div>
-              <div class="chart-bar active" style="height:88%"></div>
-              <div class="chart-bar" style="height:65%"></div>
+              <div th:each="g : ${grafikPenjualan}" 
+                   th:class="${g.isCurrent} ? 'chart-bar active' : 'chart-bar'" 
+                   th:style="'height:' + ${g.height} + '%'"
+                   th:title="'Rp ' + ${#numbers.formatDecimal(g.total, 0, 'COMMA', 0, 'POINT')}">
+              </div>
             </div>
-            <div class="chart-labels"><span>Des</span><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>Mei</span></div>
+            
+            <div class="chart-labels">
+              <span th:each="g : ${grafikPenjualan}" th:text="${g.label}">Bulan</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="col-lg-5">
-        <div class="card-c h-100">
-          <div class="ch">
-            <div class="sec-title">Aktivitas Terbaru</div>
-            <a href="penjualan.html" style="font-size:12px;color:var(--gold);text-decoration:none;">Lihat semua</a>
+     <div class="cb">
+            <div class="act-item" th:each="act : ${listAktivitas}">
+              
+              <div class="act-dot" 
+                   th:classappend="${#strings.equalsIgnoreCase(act.status, 'Selesai') ? 'green' : 
+                                   (#strings.equalsIgnoreCase(act.status, 'Pending') ? 'gold' : 
+                                   (#strings.equalsIgnoreCase(act.status, 'Ditolak') ? 'red' : 'blue'))}">
+              </div>
+              
+              <div>
+                <div class="act-text">
+                  <span th:text="${act.jenis}">Jenis</span>
+                  <b th:text="${act.merk + ' ' + act.model}">Merk Model</b>
+                  <span th:text="${#strings.equalsIgnoreCase(act.status, 'Pending') ? 'menunggu konfirmasi' : 
+                                 (#strings.equalsIgnoreCase(act.status, 'Ditolak') ? 'ditolak' : 'berhasil diproses')}">
+                  </span>
+                </div>
+                <div class="act-time">
+                  <i class="bi bi-clock me-1"></i>
+                  <span th:text="${act.tanggal}">Tanggal</span> · <span th:text="${act.aktor}">Nama Aktor</span>
+                </div>
+              </div>
+              
+            </div>
+            
+            <div th:if="${#lists.isEmpty(listAktivitas)}" style="font-size:13px; color:var(--muted); text-align:center; padding: 20px 0;">
+              Belum ada aktivitas terbaru.
+            </div>
           </div>
-          <div class="cb">
-            <div class="act-item"><div class="act-dot green"></div><div><div class="act-text">Penjualan <b>Toyota Avanza 2023</b> berhasil diproses</div><div class="act-time"><i class="bi bi-clock me-1"></i>5 menit lalu · Budi Santoso</div></div></div>
-            <div class="act-item"><div class="act-dot blue"></div><div><div class="act-text">Test drive <b>Honda CBR 150R</b> dijadwalkan</div><div class="act-time"><i class="bi bi-clock me-1"></i>22 menit lalu · Rina Dewi</div></div></div>
-            <div class="act-item"><div class="act-dot gold"></div><div><div class="act-text">Pembeli baru <b>Andi Kurniawan</b> mendaftar</div><div class="act-time"><i class="bi bi-clock me-1"></i>1 jam lalu</div></div></div>
-            <div class="act-item"><div class="act-dot red"></div><div><div class="act-text">Permintaan pembelian <b>Yamaha NMAX</b> ditolak</div><div class="act-time"><i class="bi bi-clock me-1"></i>2 jam lalu · Owner</div></div></div>
-            <div class="act-item"><div class="act-dot green"></div><div><div class="act-text">Kendaraan <b>Mitsubishi Pajero Sport</b> ditambahkan</div><div class="act-time"><i class="bi bi-clock me-1"></i>3 jam lalu · Admin</div></div></div>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- Kendaraan Unggulan -->
-    <div class="sec-divider"><div class="sec-title">Stok Kendaraan Unggulan</div></div>
+   <div class="sec-divider"><div class="sec-title">Stok Kendaraan Unggulan</div></div>
+    
     <div class="row g-3 mb-4">
-      <div class="col-6 col-md-4 col-lg-2"><div class="v-card"><div class="v-thumb">🚗</div><div class="v-brand">Toyota</div><div class="v-model">Avanza 2023 · Matic</div><div class="v-price">Rp 248 Jt</div><span class="b-status b-tersedia mt-2 d-inline-block">Tersedia</span></div></div>
-      <div class="col-6 col-md-4 col-lg-2"><div class="v-card"><div class="v-thumb">🏎️</div><div class="v-brand">Honda</div><div class="v-model">CRV Turbo · 2024</div><div class="v-price">Rp 580 Jt</div><span class="b-status b-testdrive mt-2 d-inline-block">Test Drive</span></div></div>
-      <div class="col-6 col-md-4 col-lg-2"><div class="v-card"><div class="v-thumb">🛻</div><div class="v-brand">Mitsubishi</div><div class="v-model">Pajero Sport · 2023</div><div class="v-price">Rp 695 Jt</div><span class="b-status b-tersedia mt-2 d-inline-block">Tersedia</span></div></div>
-      <div class="col-6 col-md-4 col-lg-2"><div class="v-card"><div class="v-thumb">🏍️</div><div class="v-brand">Yamaha</div><div class="v-model">NMAX 155 · 2024</div><div class="v-price">Rp 34 Jt</div><span class="b-status b-terjual mt-2 d-inline-block">Terjual</span></div></div>
-      <div class="col-6 col-md-4 col-lg-2"><div class="v-card"><div class="v-thumb">🏍️</div><div class="v-brand">Honda</div><div class="v-model">CBR 150R · 2023</div><div class="v-price">Rp 42 Jt</div><span class="b-status b-testdrive mt-2 d-inline-block">Test Drive</span></div></div>
-      <div class="col-6 col-md-4 col-lg-2"><div class="v-card"><div class="v-thumb">🚙</div><div class="v-brand">Suzuki</div><div class="v-model">XL7 Alpha · 2024</div><div class="v-price">Rp 325 Jt</div><span class="b-status b-tersedia mt-2 d-inline-block">Tersedia</span></div></div>
+      <div class="col-6 col-md-4 col-lg-2" th:each="k : ${kendaraanUnggulan}">
+        <div class="v-card">
+          <div class="v-thumb" th:text="${k.jenis == 'mobil' ? '🚗' : '🏍️'}">🚗</div>
+          
+          <div class="v-brand" th:text="${k.merk}">Merk</div>
+          
+          <div class="v-model" th:text="${#strings.substring(k.tahun, 0, 4)} + ' · ' + ${k.model}">Model</div>
+          
+          <div class="v-price" th:text="'Rp ' + ${#numbers.formatDecimal(k.harga / 1000000, 0, 'COMMA', 0, 'POINT')} + ' Jt'">Harga</div>
+          
+          <span th:class="'b-status b-' + ${#strings.toLowerCase(#strings.replace(k.status, ' ', ''))} + ' mt-2 d-inline-block'" 
+                th:text="${k.status}">Status</span>
+        </div>
+      </div>
+      
+      <div th:if="${#lists.isEmpty(kendaraanUnggulan)}" class="col-12 text-center" style="color:var(--muted); font-size:13px;">
+         Belum ada kendaraan di database.
+      </div>
     </div>
 
     <!-- Tabel Transaksi + Komposisi -->
@@ -133,10 +172,35 @@
             <table class="table tbl mb-0">
               <thead><tr><th>ID</th><th>Pembeli</th><th>Kendaraan</th><th>Tanggal</th><th>Harga</th><th>Status</th></tr></thead>
               <tbody>
-                <tr><td style="color:var(--muted)">#PJ-001</td><td><b>Budi Santoso</b></td><td>Toyota Avanza 2023</td><td>19 Mei 2025</td><td style="color:var(--gold)">Rp 248 Jt</td><td><span class="b-status b-tersedia">Selesai</span></td></tr>
-                <tr><td style="color:var(--muted)">#PJ-002</td><td><b>Rina Dewi</b></td><td>Honda CRV Turbo 2024</td><td>18 Mei 2025</td><td style="color:var(--gold)">Rp 580 Jt</td><td><span class="b-status b-pending">Pending</span></td></tr>
-                <tr><td style="color:var(--muted)">#PJ-003</td><td><b>Andi Kurniawan</b></td><td>Yamaha NMAX 155</td><td>17 Mei 2025</td><td style="color:var(--gold)">Rp 34 Jt</td><td><span class="b-status b-terjual">Terjual</span></td></tr>
-                <tr><td style="color:var(--muted)">#PJ-004</td><td><b>Sari Wulandari</b></td><td>Mitsubishi Pajero Sport</td><td>16 Mei 2025</td><td style="color:var(--gold)">Rp 695 Jt</td><td><span class="b-status b-pending">Pending</span></td></tr>
+               <tbody>
+                <tr th:each="pj : ${listTransaksi}">
+                  
+                  <td style="color:var(--muted)" th:text="'#PJ-' + ${#numbers.formatInteger(pj.id_penjualan, 3)}">#PJ-001</td>
+                  
+                  <td><b th:text="${pj.pembeli}">Nama Pembeli</b></td>
+                  
+                  <td th:text="${pj.merk + ' ' + pj.model + ' ' + #strings.substring(pj.tahun, 0, 4)}">Merk Model Tahun</td>
+                  
+                  <td th:text="${pj.tanggal}">Tanggal</td>
+                  
+                  <td style="color:var(--gold)" 
+                      th:text="'Rp ' + ${#numbers.formatDecimal(pj.harga / 1000000, 0, 'COMMA', 0, 'POINT')} + ' Jt'">
+                      Rp Harga
+                  </td>
+                  
+                  <td>
+                    <span th:class="'b-status b-' + ${#strings.toLowerCase(#strings.replace(pj.status, ' ', ''))}" 
+                          th:text="${pj.status}">Status</span>
+                  </td>
+                  
+                </tr>
+                
+                <tr th:if="${#lists.isEmpty(listTransaksi)}">
+                  <td colspan="6" class="text-center" style="color:var(--muted); padding: 20px;">
+                    Belum ada riwayat transaksi penjualan.
+                  </td>
+                </tr>
+              </tbody>
               </tbody>
             </table>
           </div>
@@ -146,10 +210,49 @@
         <div class="card-c">
           <div class="ch"><div class="sec-title">Komposisi Stok</div></div>
           <div class="cb">
-            <div class="mb-3"><div class="d-flex justify-content-between mb-1"><span style="font-size:13px">Mobil Tersedia</span><span style="font-size:13px;color:var(--gold)">68</span></div><div class="prog-wrap"><div class="prog-fill" style="width:68%"></div></div></div>
-            <div class="mb-3"><div class="d-flex justify-content-between mb-1"><span style="font-size:13px">Motor Tersedia</span><span style="font-size:13px;color:var(--gold)">45</span></div><div class="prog-wrap"><div class="prog-fill" style="width:45%"></div></div></div>
-            <div class="mb-3"><div class="d-flex justify-content-between mb-1"><span style="font-size:13px">Sedang Test Drive</span><span style="font-size:13px;color:var(--blue)">14</span></div><div class="prog-wrap"><div class="prog-fill" style="width:14%;background:linear-gradient(to right,var(--blue),#7fc7f5)"></div></div></div>
-            <div><div class="d-flex justify-content-between mb-1"><span style="font-size:13px">Terjual Bulan Ini</span><span style="font-size:13px;color:var(--green)">37</span></div><div class="prog-wrap"><div class="prog-fill" style="width:37%;background:linear-gradient(to right,var(--green),#82e9b8)"></div></div></div>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1">
+                <span style="font-size:13px">Mobil Tersedia</span>
+                <span style="font-size:13px;color:var(--gold)" th:text="${mobilTersedia}">0</span>
+              </div>
+              <div class="prog-wrap">
+                <div class="prog-fill" th:style="'width:' + ${pctMobil} + '%'"></div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1">
+                <span style="font-size:13px">Motor Tersedia</span>
+                <span style="font-size:13px;color:var(--gold)" th:text="${motorTersedia}">0</span>
+              </div>
+              <div class="prog-wrap">
+                <div class="prog-fill" th:style="'width:' + ${pctMotor} + '%'"></div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1">
+                <span style="font-size:13px">Sedang Test Drive</span>
+                <span style="font-size:13px;color:var(--blue)" th:text="${testDriveAktif}">0</span>
+              </div>
+              <div class="prog-wrap">
+                <div class="prog-fill" 
+                     th:style="'width:' + ${pctTestDrive} + '%; background:linear-gradient(to right,var(--blue),#7fc7f5)'">
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <div class="d-flex justify-content-between mb-1">
+                <span style="font-size:13px">Terjual Bulan Ini</span>
+                <span style="font-size:13px;color:var(--green)" th:text="${penjualanBulanIni}">0</span>
+              </div>
+              <div class="prog-wrap">
+                <div class="prog-fill" 
+                     th:style="'width:' + ${pctTerjual} + '%; background:linear-gradient(to right,var(--green),#82e9b8)'">
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
