@@ -137,6 +137,53 @@ public class dashboardController {
         String sqlPending = "SELECT COUNT(*) FROM penjualan WHERE status = 'Pending'";
         Integer permintaanPending = jdbcTemplate.queryForObject(sqlPending, Integer.class);
 
+        // --- LOGIKA SUB-TEKS KARTU STATISTIK (NAIK/TURUN) ---
+        
+        // 1. Total Kendaraan (Karena tidak ada kolom tanggal, kita tampilkan jumlah yang "Tersedia")
+        String sqlTersedia = "SELECT COUNT(*) FROM kendaraan WHERE status = 'Tersedia'";
+        Integer kendaraanTersedia = jdbcTemplate.queryForObject(sqlTersedia, Integer.class);
+        if (kendaraanTersedia == null) kendaraanTersedia = 0;
+
+        // 2. Penjualan (Bulan Ini vs Bulan Lalu)
+        String sqlPenjualanBulanLalu = "SELECT COUNT(*) FROM penjualan WHERE MONTH(tanggal) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH) AND YEAR(tanggal) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)";
+        Integer penjualanBulanLalu = jdbcTemplate.queryForObject(sqlPenjualanBulanLalu, Integer.class);
+        if (penjualanBulanLalu == null) penjualanBulanLalu = 0;
+        
+        int persenPenjualan = 0;
+        if (penjualanBulanLalu > 0) {
+            persenPenjualan = (int) Math.round(((double)(penjualanBulanIni - penjualanBulanLalu) / penjualanBulanLalu) * 100);
+        } else if (penjualanBulanIni > 0) {
+            persenPenjualan = 100; // Jika bulan lalu 0 tapi sekarang ada penjualan
+        }
+
+        // 3. Test Drive (Jumlah test drive khusus untuk hari ini saja)
+        String sqlTestDriveHariIni = "SELECT COUNT(*) FROM testdrive WHERE status = 'Aktif' AND tanggal = CURRENT_DATE";
+        Integer testDriveHariIni = jdbcTemplate.queryForObject(sqlTestDriveHariIni, Integer.class);
+        if (testDriveHariIni == null) testDriveHariIni = 0;
+
+        // 4. Permintaan Pending (Hari Ini vs Kemarin)
+        String sqlPendingKemarin = "SELECT COUNT(*) FROM penjualan WHERE status = 'Pending' AND tanggal = CURRENT_DATE - INTERVAL 1 DAY";
+        Integer pendingKemarin = jdbcTemplate.queryForObject(sqlPendingKemarin, Integer.class);
+        if (pendingKemarin == null) pendingKemarin = 0;
+        
+        String sqlPendingHariIni = "SELECT COUNT(*) FROM penjualan WHERE status = 'Pending' AND tanggal = CURRENT_DATE";
+        Integer pendingHariIniStat = jdbcTemplate.queryForObject(sqlPendingHariIni, Integer.class);
+        if (pendingHariIniStat == null) pendingHariIniStat = 0;
+
+        int selisihPending = pendingHariIniStat - pendingKemarin;
+
+
+        // --- MENGIRIM VARIABEL KE HTML ---
+        model.addAttribute("kendaraanTersedia", kendaraanTersedia);
+        
+        model.addAttribute("persenPenjualan", Math.abs(persenPenjualan));
+        model.addAttribute("isPenjualanNaik", persenPenjualan >= 0);
+        
+        model.addAttribute("testDriveHariIni", testDriveHariIni);
+        
+        model.addAttribute("selisihPending", Math.abs(selisihPending));
+        model.addAttribute("isPendingNaik", selisihPending >= 0); // Jika pending naik, ini berita buruk (merah)
+
         // Kirim data ke HTML (jika null/kosong, jadikan 0)
         model.addAttribute("totalKendaraan", totalKendaraan != null ? totalKendaraan : 0);
         model.addAttribute("penjualanBulanIni", penjualanBulanIni != null ? penjualanBulanIni : 0);
