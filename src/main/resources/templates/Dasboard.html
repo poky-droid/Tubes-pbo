@@ -172,7 +172,10 @@
     <div class="row g-3 mb-4">
       <div class="col-6 col-md-4 col-lg-2" th:each="k : ${kendaraanUnggulan}">
         <div class="v-card">
-          <div class="v-thumb" th:text="${k.jenis == 'mobil' ? '🚗' : '🏍️'}">🚗</div>
+          <div class="v-thumb">
+            <img th:if="${k.foto != null and !#strings.isEmpty(k.foto)}" th:src="@{'/uploads/kendaraan/' + ${k.foto}}" alt="Foto Kendaraan" style="width:100%;height:100%;object-fit:cover;border-radius:8px;"/>
+            <span th:unless="${k.foto != null and !#strings.isEmpty(k.foto)}" th:text="${k.jenis == 'mobil' ? '🚗' : '🏍️'}">🚗</span>
+          </div>
           
           <div class="v-brand" th:text="${k.merk}">Merk</div>
           

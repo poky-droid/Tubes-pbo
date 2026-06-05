@@ -1,5 +1,8 @@
 package com.example.demo.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
@@ -7,9 +10,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
-import java.util.Map;
 
 @Controller
 public class testdriveController {
@@ -23,7 +23,7 @@ public class testdriveController {
         // 1. Ambil data Daftar Jadwal Test Drive
         // Kita juga melakukan LEFT JOIN ke tabel mobil & motor agar tahu jenis kendaraannya (untuk icon)
         String sqlTabel = 
-            "SELECT td.*, u.nama as pembeli, k.merk, k.model, k.tahun, " +
+            "SELECT td.*, u.nama as pembeli, k.merk, k.model, k.tahun, k.foto, " +
             "CASE WHEN m.id_kendaraan IS NOT NULL THEN 'mobil' " +
             "     WHEN mo.id_kendaraan IS NOT NULL THEN 'motor' END as jenis " +
             "FROM testdrive td " +
