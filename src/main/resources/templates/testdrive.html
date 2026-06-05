@@ -7,6 +7,10 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
   <link href="/css/style1.css" rel="stylesheet"/>
+  <style>
+    /* Menggunakan trik padding konten agar tidak dempet */
+    .content { padding: 32px 40px !important; overflow-x: hidden; }
+  </style>
 </head>
 <body>
 <div id="sidebar"></div>
@@ -21,182 +25,132 @@
 
   <div class="content">
 
-    <!-- Stats -->
     <div class="row g-3 mb-4">
-      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon blue"><i class="bi bi-key-fill"></i></div><div class="s-val">14</div><div class="s-label">Aktif Hari Ini</div></div></div>
-      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon green"><i class="bi bi-check2-circle"></i></div><div class="s-val">89</div><div class="s-label">Selesai Bulan Ini</div></div></div>
-      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon orange"><i class="bi bi-hourglass-split"></i></div><div class="s-val">5</div><div class="s-label">Menunggu Konfirmasi</div></div></div>
-      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon red"><i class="bi bi-x-circle"></i></div><div class="s-val">3</div><div class="s-label">Dibatalkan</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon blue"><i class="bi bi-key-fill"></i></div><div class="s-val" th:text="${aktifHariIni}">0</div><div class="s-label">Aktif Hari Ini</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon green"><i class="bi bi-check2-circle"></i></div><div class="s-val" th:text="${selesaiBulanIni}">0</div><div class="s-label">Selesai Bulan Ini</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon orange"><i class="bi bi-hourglass-split"></i></div><div class="s-val" th:text="${menungguKonfirmasi}">0</div><div class="s-label">Menunggu Konfirmasi</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon red"><i class="bi bi-x-circle"></i></div><div class="s-val" th:text="${dibatalkan}">0</div><div class="s-label">Dibatalkan / Ditolak</div></div></div>
     </div>
 
-    <!-- Filter -->
     <div class="d-flex gap-2 mb-3 flex-wrap">
       <button class="pill-tab active" data-filter="semua">Semua</button>
-      <button class="pill-tab" data-filter="konfirmasi">Terkonfirmasi</button>
+      <button class="pill-tab" data-filter="aktif">Aktif</button>
       <button class="pill-tab" data-filter="pending">Pending</button>
       <button class="pill-tab" data-filter="selesai">Selesai</button>
-      <button class="pill-tab" data-filter="batal">Batal</button>
+      <button class="pill-tab" data-filter="ditolak">Ditolak</button>
+      <button class="pill-tab" data-filter="dibatalkan">Batal</button>
     </div>
 
-    <!-- Jadwal Hari Ini -->
-    <div class="sec-divider"><div class="sec-title">Jadwal Hari Ini – 20 Mei 2025</div></div>
+    <div class="sec-divider">
+      <div class="sec-title" th:text="'Seluruh Jadwal Test Drive (' + ${#lists.size(listTestDrive)} + ')'">Jadwal Test Drive</div>
+    </div>
 
     <div class="row g-3 mb-4" id="tdGrid">
-      <!-- Card jadwal -->
-      <div class="col-md-6 col-lg-4" data-status="konfirmasi">
-        <div class="card-c">
+      
+      <div class="col-md-6 col-lg-4" th:each="td : ${listTestDrive}" th:attr="data-status=${#strings.toLowerCase(#strings.replace(td.status, ' ', ''))}">
+        
+        <div class="card-c" th:style="${td.status == 'Selesai' or td.status == 'Ditolak' or td.status == 'Dibatalkan'} ? 'opacity:.6' : ''">
+          
           <div class="ch">
             <div>
-              <div style="font-family:'Bebas Neue';font-size:17px;letter-spacing:1px;color:var(--gold)">09:00 – 10:00</div>
-              <div style="font-size:12px;color:var(--muted)">20 Mei 2025</div>
+              <div style="font-family:'Bebas Neue';font-size:17px;letter-spacing:1px;color:var(--gold)" 
+                   th:text="${#strings.substring(td.jam, 0, 5)} + ' WIB'">Jam</div>
+              <div style="font-size:12px;color:var(--muted)" th:text="${td.tanggal}">Tanggal</div>
             </div>
-            <span class="b-status b-acc">Konfirmasi</span>
+            
+            <span th:class="'b-status b-' + ${#strings.toLowerCase(#strings.replace(td.status, ' ', ''))}" 
+                  th:text="${td.status}">Status</span>
           </div>
+          
           <div class="cb">
             <div class="d-flex gap-3 align-items-center mb-3">
-              <div style="font-size:32px">🏍️</div>
+              <div style="font-size:32px" th:text="${td.jenis == 'mobil' ? '🚗' : '🏍️'}">🚘</div>
               <div>
-                <div style="font-weight:600">Honda CBR 150R – 2023</div>
-                <div style="font-size:12px;color:var(--muted)">150cc · Manual · Merah</div>
+                <div style="font-weight:600" th:text="${td.merk} + ' ' + ${td.model} + ' – ' + ${#strings.substring(td.tahun, 0, 4)}">Merk Model</div>
+                <div style="font-size:12px;color:var(--muted)">Kendaraan ID: #[[${td.id_kendaraan}]]</div>
               </div>
             </div>
-            <div style="font-size:13px;margin-bottom:6px"><i class="bi bi-person-fill me-2" style="color:var(--gold)"></i><b>Rina Dewi</b></div>
-            <div style="font-size:12px;color:var(--muted);margin-bottom:12px"><i class="bi bi-telephone me-2"></i>0812-3456-7890</div>
+            
+            <div style="font-size:13px;margin-bottom:6px"><i class="bi bi-person-fill me-2" style="color:var(--gold)"></i><b th:text="${td.pembeli}">Nama Pembeli</b></div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px">
+              <i class="bi bi-chat-left-text me-2"></i><span th:text="${td.catatan != null and td.catatan != '' ? td.catatan : '-'}">Catatan</span>
+            </div>
+            
             <div class="d-flex gap-2">
+              
+              <th:block th:if="${td.status == 'Pending'}">
+                <form action="/testdrive/updateStatus" method="POST" style="margin:0; flex:1;" class="d-flex">
+                  <input type="hidden" name="idTestdrive" th:value="${td.id_testdrive}" />
+                  <input type="hidden" name="status" value="Aktif" />
+                  <button type="submit" class="btn-green flex-fill" style="font-size:11px">ACC</button>
+                </form>
+
+                <form action="/testdrive/updateStatus" method="POST" style="margin:0; flex:1;" class="d-flex">
+                  <input type="hidden" name="idTestdrive" th:value="${td.id_testdrive}" />
+                  <input type="hidden" name="status" value="Ditolak" />
+                  <button type="submit" class="btn-red flex-fill" style="font-size:11px">Tolak</button>
+                </form>
+              </th:block>
+
+              <th:block th:if="${td.status == 'Aktif' or td.status == 'Terkonfirmasi'}">
+                <form action="/testdrive/updateStatus" method="POST" style="margin:0; flex:1;" class="d-flex">
+                  <input type="hidden" name="idTestdrive" th:value="${td.id_testdrive}" />
+                  <input type="hidden" name="status" value="Selesai" />
+                  <button type="submit" class="btn-green flex-fill" style="font-size:11px">Selesaikan</button>
+                </form>
+              </th:block>
+              
               <button class="btn-og flex-fill" style="font-size:11px">History</button>
-              <button class="btn-green flex-fill" style="font-size:11px">Selesai</button>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <div class="col-md-6 col-lg-4" data-status="pending">
-        <div class="card-c">
-          <div class="ch">
-            <div>
-              <div style="font-family:'Bebas Neue';font-size:17px;letter-spacing:1px;color:var(--gold)">11:00 – 12:00</div>
-              <div style="font-size:12px;color:var(--muted)">20 Mei 2025</div>
-            </div>
-            <span class="b-status b-pending">Pending</span>
-          </div>
-          <div class="cb">
-            <div class="d-flex gap-3 align-items-center mb-3">
-              <div style="font-size:32px">🚗</div>
-              <div>
-                <div style="font-weight:600">Toyota Avanza – 2023</div>
-                <div style="font-size:12px;color:var(--muted)">1.5L · Matic · Putih</div>
-              </div>
-            </div>
-            <div style="font-size:13px;margin-bottom:6px"><i class="bi bi-person-fill me-2" style="color:var(--gold)"></i><b>Dodi Hartono</b></div>
-            <div style="font-size:12px;color:var(--muted);margin-bottom:12px"><i class="bi bi-telephone me-2"></i>0821-9988-7766</div>
-            <div class="d-flex gap-2">
-              <button class="btn-green flex-fill" style="font-size:11px" onclick="konfirmasi(this)">ACC</button>
-              <button class="btn-red flex-fill"   style="font-size:11px" onclick="batalkan(this)">Tolak</button>
-            </div>
           </div>
         </div>
       </div>
-
-      <div class="col-md-6 col-lg-4" data-status="konfirmasi">
-        <div class="card-c">
-          <div class="ch">
-            <div>
-              <div style="font-family:'Bebas Neue';font-size:17px;letter-spacing:1px;color:var(--gold)">13:30 – 14:30</div>
-              <div style="font-size:12px;color:var(--muted)">20 Mei 2025</div>
-            </div>
-            <span class="b-status b-acc">Konfirmasi</span>
-          </div>
-          <div class="cb">
-            <div class="d-flex gap-3 align-items-center mb-3">
-              <div style="font-size:32px">🏍️</div>
-              <div>
-                <div style="font-weight:600">Yamaha NMAX 155 – 2024</div>
-                <div style="font-size:12px;color:var(--muted)">155cc · Matic · Biru</div>
-              </div>
-            </div>
-            <div style="font-size:13px;margin-bottom:6px"><i class="bi bi-person-fill me-2" style="color:var(--gold)"></i><b>Nita Sari</b></div>
-            <div style="font-size:12px;color:var(--muted);margin-bottom:12px"><i class="bi bi-telephone me-2"></i>0857-1122-3344</div>
-            <div class="d-flex gap-2">
-              <button class="btn-og flex-fill" style="font-size:11px">History</button>
-              <button class="btn-green flex-fill" style="font-size:11px">Selesai</button>
-            </div>
-          </div>
-        </div>
+      
+      <div th:if="${#lists.isEmpty(listTestDrive)}" class="col-12 text-center" style="color:var(--muted); padding: 40px 0;">
+        Belum ada jadwal test drive yang terdaftar.
       </div>
-
-      <div class="col-md-6 col-lg-4" data-status="pending">
-        <div class="card-c">
-          <div class="ch">
-            <div>
-              <div style="font-family:'Bebas Neue';font-size:17px;letter-spacing:1px;color:var(--gold)">15:00 – 16:00</div>
-              <div style="font-size:12px;color:var(--muted)">20 Mei 2025</div>
-            </div>
-            <span class="b-status b-pending">Pending</span>
-          </div>
-          <div class="cb">
-            <div class="d-flex gap-3 align-items-center mb-3">
-              <div style="font-size:32px">🚙</div>
-              <div>
-                <div style="font-weight:600">Suzuki XL7 Alpha – 2024</div>
-                <div style="font-size:12px;color:var(--muted)">1.5L · Matic · Silver</div>
-              </div>
-            </div>
-            <div style="font-size:13px;margin-bottom:6px"><i class="bi bi-person-fill me-2" style="color:var(--gold)"></i><b>Reza Mahendra</b></div>
-            <div style="font-size:12px;color:var(--muted);margin-bottom:12px"><i class="bi bi-telephone me-2"></i>0899-0011-2233</div>
-            <div class="d-flex gap-2">
-              <button class="btn-green flex-fill" style="font-size:11px" onclick="konfirmasi(this)">ACC</button>
-              <button class="btn-red flex-fill"   style="font-size:11px" onclick="batalkan(this)">Tolak</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-lg-4" data-status="selesai">
-        <div class="card-c" style="opacity:.7">
-          <div class="ch">
-            <div>
-              <div style="font-family:'Bebas Neue';font-size:17px;letter-spacing:1px;color:var(--gold)">08:00 – 09:00</div>
-              <div style="font-size:12px;color:var(--muted)">20 Mei 2025</div>
-            </div>
-            <span class="b-status b-tersedia">Selesai</span>
-          </div>
-          <div class="cb">
-            <div class="d-flex gap-3 align-items-center mb-3">
-              <div style="font-size:32px">🏎️</div>
-              <div>
-                <div style="font-weight:600">Honda CRV Turbo – 2024</div>
-                <div style="font-size:12px;color:var(--muted)">1.5T · Matic · Putih</div>
-              </div>
-            </div>
-            <div style="font-size:13px;margin-bottom:6px"><i class="bi bi-person-fill me-2" style="color:var(--gold)"></i><b>Farida Kusuma</b></div>
-            <div style="font-size:12px;color:var(--muted);margin-bottom:12px"><i class="bi bi-telephone me-2"></i>0878-5566-1122</div>
-            <div class="d-flex gap-2">
-              <button class="btn-og flex-fill" style="font-size:11px">Lihat History</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      
     </div>
 
-    <div class="pg-footer">AUTOPRIME SHOWROOM MANAGEMENT &nbsp;·&nbsp; © 2025</div>
+    <div class="pg-footer">AUTOPRIME SHOWROOM MANAGEMENT &nbsp;·&nbsp; © 2026</div>
   </div>
 </div>
 
-<!-- Modal Jadwalkan -->
 <div class="modal-overlay" id="modalTD">
   <div class="modal-box">
     <div class="modal-title">Jadwalkan Test Drive</div>
-    <div class="row g-3">
-      <div class="col-12"><label class="lbl">Pembeli</label><select class="form-c"><option>Budi Santoso</option><option>Rina Dewi</option><option>Andi Kurniawan</option></select></div>
-      <div class="col-12"><label class="lbl">Kendaraan</label><select class="form-c"><option>Toyota Avanza 2023</option><option>Honda CRV 2024</option><option>Yamaha NMAX 155</option><option>Honda CBR 150R</option></select></div>
-      <div class="col-6"><label class="lbl">Tanggal</label><input class="form-c" type="date"/></div>
-      <div class="col-6"><label class="lbl">Jam</label><input class="form-c" type="time"/></div>
-      <div class="col-12"><label class="lbl">Catatan</label><textarea class="form-c" rows="2" placeholder="Catatan khusus..."></textarea></div>
-    </div>
-    <div class="d-flex gap-2 mt-4 justify-content-end">
-      <button class="btn-red" onclick="closeModal()">Batal</button>
-      <button class="btn-gold">Simpan Jadwal</button>
-    </div>
+    <form action="/testdrive/tambah" method="POST">
+      <div class="row g-3">
+        
+        <div class="col-12">
+          <label class="lbl">Pembeli</label>
+          <select name="idPembeli" class="form-c" required>
+            <option value="">-- Pilih Pembeli --</option>
+            <option th:each="p : ${listPembeli}" th:value="${p.id_pembeli}" th:text="${p.nama}"></option>
+          </select>
+        </div>
+        
+        <div class="col-12">
+          <label class="lbl">Kendaraan (Tersedia)</label>
+          <select name="idKendaraan" class="form-c" required>
+            <option value="">-- Pilih Kendaraan --</option>
+            <option th:each="k : ${listKendaraan}" th:value="${k.id_kendaraan}" th:text="${k.merk} + ' ' + ${k.model}"></option>
+          </select>
+        </div>
+        
+        <div class="col-6"><label class="lbl">Tanggal</label><input name="tanggal" class="form-c" type="date" required/></div>
+        <div class="col-6"><label class="lbl">Jam</label><input name="jam" class="form-c" type="time" required/></div>
+        
+        <input type="hidden" name="status" value="Pending"/>
+        
+        <div class="col-12"><label class="lbl">Catatan</label><textarea name="catatan" class="form-c" rows="2" placeholder="Catatan khusus..."></textarea></div>
+      </div>
+      <div class="d-flex gap-2 mt-4 justify-content-end">
+        <button type="button" class="btn-red" onclick="closeModal()">Batal</button>
+        <button type="submit" class="btn-gold">Simpan Jadwal</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -205,6 +159,7 @@
 <script>
   renderSidebar('testdrive.html');
 
+  // Filter Data
   document.querySelectorAll('[data-filter]').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
@@ -216,6 +171,7 @@
     });
   });
 
+  // Search Data
   document.getElementById('searchInput').addEventListener('input', function() {
     const q = this.value.toLowerCase();
     document.querySelectorAll('#tdGrid [data-status]').forEach(c => {
@@ -223,21 +179,7 @@
     });
   });
 
-  function konfirmasi(btn) {
-    const card = btn.closest('.card-c');
-    card.querySelector('.b-status').className = 'b-status b-acc';
-    card.querySelector('.b-status').textContent = 'Konfirmasi';
-    btn.closest('[data-status]').dataset.status = 'konfirmasi';
-    btn.closest('.d-flex').innerHTML = '<button class="btn-og flex-fill" style="font-size:11px">History</button><button class="btn-green flex-fill" style="font-size:11px">Selesai</button>';
-  }
-  function batalkan(btn) {
-    const card = btn.closest('.card-c');
-    card.querySelector('.b-status').className = 'b-status b-ditolak';
-    card.querySelector('.b-status').textContent = 'Batal';
-    btn.closest('[data-status]').dataset.status = 'batal';
-    btn.closest('.d-flex').innerHTML = '<button class="btn-og flex-fill" style="font-size:11px">History</button>';
-  }
-
+  // Buka Tutup Modal
   function openModal()  { document.getElementById('modalTD').classList.add('show'); }
   function closeModal() { document.getElementById('modalTD').classList.remove('show'); }
   document.getElementById('modalTD').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });

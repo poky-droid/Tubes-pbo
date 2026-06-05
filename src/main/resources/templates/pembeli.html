@@ -7,6 +7,10 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
   <link href="/css/style1.css" rel="stylesheet"/>
+  <style>
+    /* Menggunakan trik padding konten agar tidak dempet */
+    .content { padding: 32px 40px !important; overflow-x: hidden; }
+  </style>
 </head>
 <body>
 <div id="sidebar"></div>
@@ -21,19 +25,17 @@
 
   <div class="content">
 
-    <!-- Stats -->
     <div class="row g-3 mb-4">
-      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon gold"><i class="bi bi-people-fill"></i></div><div class="s-val">248</div><div class="s-label">Total Pembeli</div><div class="s-change up">▲ +12 bulan ini</div></div></div>
-      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon green"><i class="bi bi-bag-heart-fill"></i></div><div class="s-val">87</div><div class="s-label">Sudah Beli</div></div></div>
-      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon blue"><i class="bi bi-key-fill"></i></div><div class="s-val">34</div><div class="s-label">Pernah Test Drive</div></div></div>
-      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon orange"><i class="bi bi-person-fill-exclamation"></i></div><div class="s-val">127</div><div class="s-label">Prospek Aktif</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon gold"><i class="bi bi-people-fill"></i></div><div class="s-val" th:text="${totalPembeli}">0</div><div class="s-label">Total Pembeli</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon green"><i class="bi bi-bag-heart-fill"></i></div><div class="s-val" th:text="${sudahBeli}">0</div><div class="s-label">Sudah Beli</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon blue"><i class="bi bi-key-fill"></i></div><div class="s-val" th:text="${pernahTestDrive}">0</div><div class="s-label">Pernah Test Drive</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card"><div class="s-icon orange"><i class="bi bi-person-fill-exclamation"></i></div><div class="s-val" th:text="${prospekAktif}">0</div><div class="s-label">Prospek Aktif</div></div></div>
     </div>
 
-    <!-- Tabel Pembeli -->
     <div class="card-c">
       <div class="ch">
         <div class="sec-title">Daftar Pembeli</div>
-        <span style="font-size:12px;color:var(--muted)">248 data terdaftar</span>
+        <span style="font-size:12px;color:var(--muted)" th:text="${totalPembeli} + ' data terdaftar'">0 data terdaftar</span>
       </div>
       <div style="overflow-x:auto;">
         <table class="table tbl mb-0" id="tabelPembeli">
@@ -49,129 +51,79 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
+            
+            <tr th:each="p : ${listPembeli}">
               <td>
                 <div class="d-flex align-items-center gap-2">
-                  <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#8b5e2a);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';color:#000;font-size:14px;flex-shrink:0">B</div>
-                  <div><div style="font-weight:600;font-size:13px">Budi Santoso</div><div style="font-size:11px;color:var(--muted)">budi@email.com</div></div>
+                  <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#8b5e2a);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';color:#000;font-size:14px;flex-shrink:0" 
+                       th:text="${p.nama != null and p.nama.length() > 0 ? #strings.substring(p.nama, 0, 1) : 'U'}">U</div>
+                  <div>
+                    <div style="font-weight:600;font-size:13px" th:text="${p.nama}">Nama Pembeli</div>
+                    <div style="font-size:11px;color:var(--muted)" th:text="${p.email}">email@domain.com</div>
+                  </div>
                 </div>
               </td>
-              <td style="color:var(--muted)">@budi_s</td>
-              <td style="font-size:12px">0812-3456-7890</td>
-              <td style="color:var(--gold)">2 unit</td>
-              <td>3x</td>
-              <td><span class="b-status b-acc">Pembeli</span></td>
-              <td><button class="btn-og" style="font-size:11px;padding:4px 10px" onclick="openDetail('Budi Santoso')">Detail</button></td>
-            </tr>
-            <tr>
+              
+              <td style="color:var(--muted)" th:text="'@' + ${p.username}">@username</td>
+              
+              <td style="font-size:12px" th:text="${p.kontak != null and p.kontak != '' ? p.kontak : '-'}">0812-xxxx</td>
+              
+              <td style="color:var(--gold)" th:text="${p.total_beli} + ' unit'">0 unit</td>
+              <td th:text="${p.total_td} + 'x'">0x</td>
+              
               <td>
-                <div class="d-flex align-items-center gap-2">
-                  <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3498db,#1a6fa3);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';color:#fff;font-size:14px;flex-shrink:0">R</div>
-                  <div><div style="font-weight:600;font-size:13px">Rina Dewi</div><div style="font-size:11px;color:var(--muted)">rina@email.com</div></div>
-                </div>
+                <span th:if="${p.total_beli > 0}" class="b-status b-acc">Pembeli</span>
+                <span th:if="${p.total_beli == 0}" class="b-status b-testdrive">Prospek</span>
               </td>
-              <td style="color:var(--muted)">@rina_d</td>
-              <td style="font-size:12px">0821-9988-7766</td>
-              <td style="color:var(--gold)">1 unit</td>
-              <td>5x</td>
-              <td><span class="b-status b-testdrive">Prospek</span></td>
-              <td><button class="btn-og" style="font-size:11px;padding:4px 10px" onclick="openDetail('Rina Dewi')">Detail</button></td>
+              
+              <td><button class="btn-og" style="font-size:11px;padding:4px 10px" th:attr="onclick='openDetail(' + ${p.id_pembeli} + ', \'' + ${p.nama} + '\')'">Detail</button></td>
             </tr>
-            <tr>
-              <td>
-                <div class="d-flex align-items-center gap-2">
-                  <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--green),#1a8a4f);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';color:#000;font-size:14px;flex-shrink:0">A</div>
-                  <div><div style="font-weight:600;font-size:13px">Andi Kurniawan</div><div style="font-size:11px;color:var(--muted)">andi@email.com</div></div>
-                </div>
-              </td>
-              <td style="color:var(--muted)">@andi_k</td>
-              <td style="font-size:12px">0856-4455-2211</td>
-              <td style="color:var(--gold)">1 unit</td>
-              <td>2x</td>
-              <td><span class="b-status b-acc">Pembeli</span></td>
-              <td><button class="btn-og" style="font-size:11px;padding:4px 10px" onclick="openDetail('Andi Kurniawan')">Detail</button></td>
+            
+            <tr th:if="${#lists.isEmpty(listPembeli)}">
+              <td colspan="7" class="text-center" style="color:var(--muted); padding: 40px 0;">Belum ada data pembeli terdaftar.</td>
             </tr>
-            <tr>
-              <td>
-                <div class="d-flex align-items-center gap-2">
-                  <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--red),#8a1a1a);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';color:#fff;font-size:14px;flex-shrink:0">S</div>
-                  <div><div style="font-weight:600;font-size:13px">Sari Wulandari</div><div style="font-size:11px;color:var(--muted)">sari@email.com</div></div>
-                </div>
-              </td>
-              <td style="color:var(--muted)">@sari_w</td>
-              <td style="font-size:12px">0877-3344-5566</td>
-              <td style="color:var(--gold)">0 unit</td>
-              <td>1x</td>
-              <td><span class="b-status b-pending">Pending</span></td>
-              <td><button class="btn-og" style="font-size:11px;padding:4px 10px" onclick="openDetail('Sari Wulandari')">Detail</button></td>
-            </tr>
-            <tr>
-              <td>
-                <div class="d-flex align-items-center gap-2">
-                  <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#8a5a1a);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';color:#fff;font-size:14px;flex-shrink:0">D</div>
-                  <div><div style="font-weight:600;font-size:13px">Dimas Pratama</div><div style="font-size:11px;color:var(--muted)">dimas@email.com</div></div>
-                </div>
-              </td>
-              <td style="color:var(--muted)">@dimas_p</td>
-              <td style="font-size:12px">0899-0011-2233</td>
-              <td style="color:var(--gold)">3 unit</td>
-              <td>7x</td>
-              <td><span class="b-status b-acc">Pembeli</span></td>
-              <td><button class="btn-og" style="font-size:11px;padding:4px 10px" onclick="openDetail('Dimas Pratama')">Detail</button></td>
-            </tr>
-            <tr>
-              <td>
-                <div class="d-flex align-items-center gap-2">
-                  <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#9b59b6,#6c3483);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';color:#fff;font-size:14px;flex-shrink:0">L</div>
-                  <div><div style="font-weight:600;font-size:13px">Lusi Permata</div><div style="font-size:11px;color:var(--muted)">lusi@email.com</div></div>
-                </div>
-              </td>
-              <td style="color:var(--muted)">@lusi_p</td>
-              <td style="font-size:12px">0812-5566-7788</td>
-              <td style="color:var(--gold)">0 unit</td>
-              <td>0x</td>
-              <td><span class="b-status b-testdrive">Prospek</span></td>
-              <td><button class="btn-og" style="font-size:11px;padding:4px 10px" onclick="openDetail('Lusi Permata')">Detail</button></td>
-            </tr>
+
           </tbody>
         </table>
       </div>
     </div>
 
-    <div class="pg-footer mt-4">AUTOPRIME SHOWROOM MANAGEMENT &nbsp;·&nbsp; © 2025</div>
+    <div class="pg-footer mt-4">AUTOPRIME SHOWROOM MANAGEMENT &nbsp;·&nbsp; © 2026</div>
   </div>
 </div>
 
-<!-- Modal Tambah Pembeli -->
 <div class="modal-overlay" id="modalPembeli">
   <div class="modal-box">
     <div class="modal-title">Tambah Pembeli</div>
-    <div class="row g-3">
-      <div class="col-6"><label class="lbl">Nama Lengkap</label><input class="form-c" placeholder="Nama pembeli"/></div>
-      <div class="col-6"><label class="lbl">Username</label><input class="form-c" placeholder="@username"/></div>
-      <div class="col-6"><label class="lbl">Email</label><input class="form-c" type="email" placeholder="email@domain.com"/></div>
-      <div class="col-6"><label class="lbl">No. HP</label><input class="form-c" placeholder="08xx-xxxx-xxxx"/></div>
-      <div class="col-12"><label class="lbl">Password</label><input class="form-c" type="password" placeholder="Password akun pembeli"/></div>
-    </div>
-    <div class="d-flex gap-2 mt-4 justify-content-end">
-      <button class="btn-red" onclick="closeModal()">Batal</button>
-      <button class="btn-gold">Daftarkan</button>
-    </div>
+    <form action="/pembeli/tambah" method="POST">
+      <div class="row g-3">
+        <div class="col-6"><label class="lbl">Nama Lengkap</label><input name="nama" class="form-c" placeholder="Nama pembeli" required/></div>
+        <div class="col-6"><label class="lbl">Username</label><input name="username" class="form-c" placeholder="@username" required/></div>
+        <div class="col-6"><label class="lbl">Email</label><input name="email" class="form-c" type="email" placeholder="email@domain.com" required/></div>
+        <div class="col-6"><label class="lbl">No. HP</label><input name="kontak" class="form-c" placeholder="08xx-xxxx-xxxx" required/></div>
+        <div class="col-12"><label class="lbl">Password</label><input name="password" class="form-c" type="password" placeholder="Password akun pembeli" required/></div>
+      </div>
+      <div class="d-flex gap-2 mt-4 justify-content-end">
+        <button type="button" class="btn-red" onclick="closeModal()">Batal</button>
+        <button type="submit" class="btn-gold">Daftarkan</button>
+      </div>
+    </form>
   </div>
 </div>
 
-<!-- Modal Detail -->
 <div class="modal-overlay" id="modalDetail">
   <div class="modal-box">
     <div class="modal-title" id="detailNama">Detail Pembeli</div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Riwayat aktivitas pembeli di showroom</div>
+    
     <div class="row g-2 mb-3">
-      <div class="col-6"><div style="background:var(--dark-4);border-radius:8px;padding:12px;text-align:center"><div style="font-family:'Bebas Neue';font-size:22px;color:var(--gold)">2</div><div style="font-size:11px;color:var(--muted)">Unit Dibeli</div></div></div>
-      <div class="col-6"><div style="background:var(--dark-4);border-radius:8px;padding:12px;text-align:center"><div style="font-family:'Bebas Neue';font-size:22px;color:var(--blue)">3</div><div style="font-size:11px;color:var(--muted)">Test Drive</div></div></div>
+      <div class="col-6"><div style="background:var(--dark-4);border-radius:8px;padding:12px;text-align:center"><div class="s-val" id="detTotalBeli" style="font-family:'Bebas Neue';font-size:22px;color:var(--gold)">0</div><div style="font-size:11px;color:var(--muted)">Unit Dibeli</div></div></div>
+      <div class="col-6"><div style="background:var(--dark-4);border-radius:8px;padding:12px;text-align:center"><div class="s-val" id="detTotalTd" style="font-family:'Bebas Neue';font-size:22px;color:var(--blue)">0</div><div style="font-size:11px;color:var(--muted)">Test Drive</div></div></div>
     </div>
-    <div class="act-item"><div class="act-dot green"></div><div><div class="act-text">Membeli <b>Toyota Avanza 2023</b></div><div class="act-time">19 Mei 2025</div></div></div>
-    <div class="act-item"><div class="act-dot blue"></div><div><div class="act-text">Test Drive <b>Honda CRV Turbo</b></div><div class="act-time">10 Mei 2025</div></div></div>
-    <div class="act-item"><div class="act-dot gold"></div><div><div class="act-text">Mendaftar sebagai pembeli</div><div class="act-time">1 Jan 2025</div></div></div>
+    
+    <div id="detailActivityList" style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
+       </div>
+
     <div class="d-flex gap-2 mt-4 justify-content-end">
       <button class="btn-red" onclick="closeDetail()">Tutup</button>
     </div>
@@ -183,6 +135,7 @@
 <script>
   renderSidebar('pembeli.html');
 
+  // Fitur Pencarian
   document.getElementById('searchInput').addEventListener('input', function() {
     const q = this.value.toLowerCase();
     document.querySelectorAll('#tabelPembeli tbody tr').forEach(row => {
@@ -190,16 +143,66 @@
     });
   });
 
+  // Fungsi Buka/Tutup Modal Tambah
   function openModal()  { document.getElementById('modalPembeli').classList.add('show'); }
   function closeModal() { document.getElementById('modalPembeli').classList.remove('show'); }
   document.getElementById('modalPembeli').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
 
-  function openDetail(nama) {
-    document.getElementById('detailNama').textContent = nama;
-    document.getElementById('modalDetail').classList.add('show');
-  }
+  // Fungsi Buka/Tutup Modal Detail
   function closeDetail() { document.getElementById('modalDetail').classList.remove('show'); }
   document.getElementById('modalDetail').addEventListener('click', e => { if(e.target===e.currentTarget) closeDetail(); });
+
+  // Fungsi Utama AJAX untuk Menarik Riwayat Pembeli
+  async function openDetail(id, nama) {
+    // Tampilkan modal dan set nama
+    document.getElementById('detailNama').textContent = nama;
+    document.getElementById('modalDetail').classList.add('show');
+    
+    // Setel efek loading sementara
+    document.getElementById('detTotalBeli').textContent = '...';
+    document.getElementById('detTotalTd').textContent = '...';
+    document.getElementById('detailActivityList').innerHTML = '<div class="text-center" style="color:var(--muted); font-size:12px; padding:20px;">Memuat data...</div>';
+
+    try {
+      // Menarik data dari Endpoint Java
+      const response = await fetch('/pembeli/detail/' + id);
+      const data = await response.json();
+
+      if (data.success) {
+        // Update angka statistik di dalam kotak
+        document.getElementById('detTotalBeli').textContent = data.totalBeli;
+        document.getElementById('detTotalTd').textContent = data.totalTd;
+
+        // Merangkai HTML riwayat
+        let actHtml = '';
+        if (data.activities && data.activities.length > 0) {
+          data.activities.forEach(act => {
+            // Tentukan warna dan teks berdasarkan tipe aktivitas
+            let dotColor = act.jenis === 'Beli' ? 'green' : 'blue';
+            let actionText = act.jenis === 'Beli' ? (act.status === 'Selesai' ? 'Membeli' : 'Memesan') : 'Test Drive';
+            
+            actHtml += `
+            <div class="act-item">
+              <div class="act-dot ${dotColor}"></div>
+              <div>
+                <div class="act-text">${actionText} <b>${act.merk} ${act.model}</b></div>
+                <div class="act-time"><i class="bi bi-clock me-1"></i>${act.tanggal} &middot; Status: ${act.status}</div>
+              </div>
+            </div>`;
+          });
+        } else {
+          actHtml = '<div class="text-center" style="color:var(--muted); font-size:12px; padding:20px;">Belum ada riwayat aktivitas.</div>';
+        }
+        
+        // Suntikkan HTML ke dalam modal
+        document.getElementById('detailActivityList').innerHTML = actHtml;
+      } else {
+        document.getElementById('detailActivityList').innerHTML = '<div class="text-center" style="color:var(--red); font-size:12px; padding:20px;">Gagal memuat: ' + data.message + '</div>';
+      }
+    } catch (err) {
+      document.getElementById('detailActivityList').innerHTML = '<div class="text-center" style="color:var(--red); font-size:12px; padding:20px;">Gagal menarik data dari server.</div>';
+    }
+  }
 </script>
 </body>
 </html>

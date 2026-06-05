@@ -120,19 +120,19 @@ public class userController extends user {
         return result;
     }
 
-    // ── Routing halaman lain ──────────────────────────────────────────────
-    @RequestMapping(method = RequestMethod.GET, value = "/penjualan")
-    public String penjualan() { return "penjualan"; }
+    // // ── Routing halaman lain ──────────────────────────────────────────────
+    // @RequestMapping(method = RequestMethod.GET, value = "/penjualan")
+    // public String penjualan() { return "penjualan"; }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/testdrive")
-    public String testdrive() { return "testdrive"; }
+    // @RequestMapping(method = RequestMethod.GET, value = "/testdrive")
+    // public String testdrive() { return "testdrive"; }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/pembeli")
-    public String pembeli() { return "pembeli"; }
+    // @RequestMapping(method = RequestMethod.GET, value = "/pembeli")
+    // public String pembeli() { return "pembeli"; }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/laporan")
-    public String laporan() { return "laporan"; }
+    // @RequestMapping(method = RequestMethod.GET, value = "/laporan")
+    // public String laporan() { return "laporan"; }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/profil")
-    public String profil() { return "profil"; }
+    // @RequestMapping(method = RequestMethod.GET, value = "/profil")
+    // public String profil() { return "profil"; }
 }
