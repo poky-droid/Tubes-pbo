@@ -1,6 +1,6 @@
 package com.example.demo.model;
 
-public class Kendaraan {
+public class kendaraan {
     private int IdKendaraan;
     private String Merk;
     private String model; // Tambahan wajib untuk sinkron dengan SQL
@@ -8,7 +8,7 @@ public class Kendaraan {
     private double harga;
     private String status;
 
-    public Kendaraan(int IdKendaraan, String Merk, String model, int tahun, double harga, String status) {
+    public kendaraan(int IdKendaraan, String Merk, String model, int tahun, double harga, String status) {
         this.IdKendaraan = IdKendaraan;
         this.Merk = Merk;
         this.model = model;

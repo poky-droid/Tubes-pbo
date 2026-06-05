@@ -1,12 +1,12 @@
 function renderSidebar(activePage) {
   const links = [
-    { href: 'Dashboard',     icon: 'bi-speedometer2',        label: 'Dashboard' },
-    { href: 'kendaraan', icon: 'bi-car-front-fill',      label: 'Kendaraan' },
-    { href: 'penjualan', icon: 'bi-receipt-cutoff',      label: 'Penjualan' },
-    { href: 'testdrive', icon: 'bi-key-fill',            label: 'Test Drive' },
-    { href: 'pembeli',   icon: 'bi-people-fill',         label: 'Pembeli' },
-    { href: 'laporan',   icon: 'bi-file-earmark-bar-graph-fill', label: 'Laporan' },
-    { href: 'profil',    icon: 'bi-person-badge-fill',   label: 'Profil Owner' },
+    { href: '/admin/Dashboard',     icon: 'bi-speedometer2',        label: 'Dashboard' },
+    { href: '/admin/kendaraan', icon: 'bi-car-front-fill',      label: 'Kendaraan' },
+    { href: '/admin/penjualan', icon: 'bi-receipt-cutoff',      label: 'Penjualan' },
+    { href: '/admin/testdrive', icon: 'bi-key-fill',            label: 'Test Drive' },
+    { href: '/admin/pembeli',   icon: 'bi-people-fill',         label: 'Pembeli' },
+    { href: '/admin/laporan',   icon: 'bi-file-earmark-bar-graph-fill', label: 'Laporan' },
+    { href: '/admin/profil',    icon: 'bi-person-badge-fill',   label: 'Profil Owner' },
   ];
 
   const mainLinks = links.slice(0, 5);

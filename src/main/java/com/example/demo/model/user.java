@@ -13,7 +13,7 @@ public class User {
 
     public boolean login(String email, String password) {
         return true;
-      
+    
     }
 
     // Getter dan Setter

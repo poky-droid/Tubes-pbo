@@ -14,38 +14,39 @@ public class userController  extends User {
         return "index";
     }
 
-    // @RequestMapping(method=RequestMethod.GET, value = "/Dashboard")
-    // public String DashboardRooting() {
-    //     return "Dasboard";
-    // }
-    // @RequestMapping( method=RequestMethod.GET, value = "/kendaraan")
-    // public String kendaraan() {
-    //     return "kendaraan";
-    // }
+    @RequestMapping(method=RequestMethod.GET, value = "/admin/Dashboard")
+    public String dashboard() {
+        return "admin/Dasboard";
+    }
 
-    @RequestMapping( method=RequestMethod.GET, value = "/penjualan")
+    @RequestMapping(method=RequestMethod.GET, value = "/admin/kendaraan")
+    public String kendaraan() {
+        return "admin/kendaraan";
+    }
+
+    @RequestMapping(method=RequestMethod.GET, value = "/admin/penjualan")
     public String penjualan() {
-        return "penjualan";
+        return "admin/penjualan";
     }
 
-    @RequestMapping( method=RequestMethod.GET, value = "/testdrive")
+    @RequestMapping(method=RequestMethod.GET, value = "/admin/testdrive")
     public String testdrive() {
-        return "testdrive";
+        return "admin/testdrive";
     }
 
-    @RequestMapping( method=RequestMethod.GET, value = "/pembeli")
+    @RequestMapping(method=RequestMethod.GET, value = "/admin/pembeli")
     public String pembeli() {
-        return "pembeli";
+        return "admin/pembeli";
     }
 
-    @RequestMapping( method=RequestMethod.GET, value = "/laporan")
+    @RequestMapping(method=RequestMethod.GET, value = "/admin/laporan")
     public String laporan() {
-        return "laporan";
+        return "admin/laporan";
     }
 
-    @RequestMapping( method=RequestMethod.GET, value = "/profil")
+    @RequestMapping(method=RequestMethod.GET, value = "/admin/profil")
     public String profil() {
-        return "profil";
+        return "admin/profil";
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/loginForm")
@@ -56,7 +57,7 @@ public class userController  extends User {
         User user = new User();
 
         if (user.login(email, password)) {
-            return "Dasboard";
+            return "redirect:/admin/Dashboard";
         } else {
             return "index";
         }

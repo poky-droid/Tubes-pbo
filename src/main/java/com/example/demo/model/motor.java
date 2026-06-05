@@ -1,13 +1,13 @@
 package com.example.demo.model;
 
-public class Motor extends Kendaraan {
+public class motor extends kendaraan {
     
     private int idMotor;
     private int cc;
     private String jenisMotor;
     private double kapasitasTangki;
 
-    public Motor(int IdKendaraan, String Merk, String model, int tahun, double harga, String status,
+    public motor(int IdKendaraan, String Merk, String model, int tahun, double harga, String status,
                  int idMotor, int cc, String jenisMotor, double kapasitasTangki) {
         
         super(IdKendaraan, Merk, model, tahun, harga, status);

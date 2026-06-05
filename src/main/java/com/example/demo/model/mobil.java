@@ -1,6 +1,6 @@
 package com.example.demo.model;
 
-public class Mobil extends Kendaraan {
+public class mobil extends kendaraan {
     
     private int idMobil;
     private String mesinMobil;
@@ -9,7 +9,7 @@ public class Mobil extends Kendaraan {
     private int kapasitasMobil;
 
     // Tambahkan 'String model' pada parameter di bawah ini
-    public Mobil(int IdKendaraan, String Merk, String model, int tahun, double harga, String status, 
+    public mobil(int IdKendaraan, String Merk, String model, int tahun, double harga, String status, 
                  int idMobil, String mesinMobil, String jenisMobil, String transmisiMobil, int kapasitasMobil) {
         
         // Tambahkan 'model' ke dalam super()
