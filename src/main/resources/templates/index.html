@@ -1,85 +1,293 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basic Login Form</title>
-    <meta name="description" content="Clean, simple, copy-paste-ready login form with email + password validation.">
-    <meta name="author" content="Aigars Silkalns / Colorlib">
-    <link rel="canonical" href="https://puikinsh.github.io/login-forms/forms/basic/">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%236366f1'/><text x='50' y='68' font-size='60' text-anchor='middle' fill='white' font-family='system-ui,sans-serif'>L</text></svg>">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Basic Login Form">
-    <meta property="og:description" content="Clean, simple, copy-paste-ready login form with email + password validation.">
-    <meta property="og:url" content="https://puikinsh.github.io/login-forms/forms/basic/">
-    <meta property="og:image" content="https://puikinsh.github.io/login-forms/assets/screenshots/basic.png">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Basic Login Form">
-    <meta name="twitter:description" content="Clean, simple, copy-paste-ready login form with email + password validation.">
-    <meta name="twitter:image" content="https://puikinsh.github.io/login-forms/assets/screenshots/basic.png">
-    <link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AutoPrime – Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <style>
+    /* ── Panel kanan: dua form bisa di-toggle ── */
+    .auth-panel { width: 100%; }
+
+    .form-section { display: none; }
+    .form-section.active { display: block; }
+
+    /* Alert boxes */
+    .alert-box {
+      padding: 11px 14px; border-radius: 10px;
+      font-size: 13px; font-weight: 500;
+      margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+    }
+    .alert-error   { background: #FDECEA; color: #D0021B; border: 1.5px solid #f8c5c0; }
+    .alert-success { background: #E6F7EE; color: #00A650; border: 1.5px solid #a3e3be; }
+
+    /* Password strength bar */
+    .strength-bar { height: 4px; border-radius: 2px; margin-top: 6px; transition: all .3s; }
+    .strength-label { font-size: 11px; margin-top: 3px; font-weight: 600; }
+  </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <h2>Sign In</h2>
-                <p>Enter your credentials to access your account</p>
-            </div>
-            
-           <form class="login-form" id="loginForm" action="/loginForm" method="POST" novalidate>
-                <div class="form-group">
-                    <div class="input-wrapper">
-                        <input type="email" id="email" name="email" required autocomplete="email">
-                        <label for="email">Email Address</label>
-                    </div>
-                    <span class="error-message" id="emailError"></span>
-                </div>
+<div class="login-container">
 
-                <div class="form-group">
-                    <div class="input-wrapper password-wrapper">
-                        <input type="password" id="password" name="password" required autocomplete="current-password">
-                        <label for="password">Password</label>
-                        <button type="button" class="password-toggle" id="passwordToggle" aria-label="Toggle password visibility">
-                            <span class="eye-icon"></span>
-                        </button>
-                    </div>
-                    <span class="error-message" id="passwordError"></span>
-                </div>
-
-                
-
-                <button type="submit" class="login-btn">
-                    <span class="btn-text">Sign In</span>
-                    <span class="btn-loader"></span>
-                </button>
-            </form>
-
-            <div class="signup-link">
-                <p>Don't have an account? <a href="#">Create one</a></p>
-            </div>
-
-            
-        </div>
+  <!-- ── Kiri: Branding ── -->
+  <div class="login-left">
+    <div class="ll-icon">🚗</div>
+    <div class="ll-title">AutoPrime</div>
+    <div class="ll-sub">Platform manajemen showroom kendaraan modern, cepat, dan terpercaya.</div>
+    <div class="ll-features">
+      <div class="ll-feat"><div class="ll-feat-dot"></div>Kelola stok mobil &amp; motor dengan mudah</div>
+      <div class="ll-feat"><div class="ll-feat-dot"></div>Pantau penjualan &amp; test drive real-time</div>
+      <div class="ll-feat"><div class="ll-feat-dot"></div>Laporan pendapatan otomatis tiap bulan</div>
     </div>
+  </div>
 
-    <script src="/js/script.js"></script>
+  <!-- ── Kanan: Form ── -->
+  <div class="login-right">
+    <div class="login-card">
+
+      <!-- ════════ FORM LOGIN ════════ -->
+      <div class="form-section active" id="loginSection">
+        <div class="login-header">
+          <h2>Selamat Datang 👋</h2>
+          <p>Masuk ke akun AutoPrime Anda</p>
+        </div>
+
+        <!-- Error dari server -->
+        <div th:if="${loginError}" class="alert-box alert-error">
+          <i class="bi bi-exclamation-circle-fill"></i>
+          <span th:text="${loginError}"></span>
+        </div>
+        <!-- Sukses register (redirect ke login) -->
+        <div th:if="${registerSuccess}" class="alert-box alert-success">
+          <i class="bi bi-check-circle-fill"></i>
+          <span th:text="${registerSuccess}"></span>
+        </div>
+
+        <form id="loginForm" action="/loginForm" method="POST" novalidate>
+          <div class="form-group">
+            <div class="input-wrapper">
+              <input type="text" id="username" name="username" placeholder=" " required autocomplete="username"/>
+              <label for="username">Username</label>
+            </div>
+            <span class="error-message" id="usernameError"></span>
+          </div>
+
+          <div class="form-group">
+            <div class="input-wrapper password-wrapper">
+              <input type="password" id="password" name="password" placeholder=" " required autocomplete="current-password"/>
+              <label for="password">Password</label>
+              <button type="button" class="password-toggle" onclick="togglePw('password','eyeLogin')" aria-label="Toggle password">
+                <i class="bi bi-eye" id="eyeLogin"></i>
+              </button>
+            </div>
+            <span class="error-message" id="passwordError"></span>
+          </div>
+
+          <button type="submit" class="login-btn">Masuk</button>
+        </form>
+
+        <div class="signup-link" style="margin-top:20px">
+          <p>Belum punya akun? <a href="#" onclick="switchTo('register'); return false;">Daftar Sekarang</a></p>
+        </div>
+      </div>
+
+      <!-- ════════ FORM REGISTER ════════ -->
+      <div class="form-section" id="registerSection">
+        <div class="login-header">
+          <h2>Buat Akun Baru ✨</h2>
+          <p>Daftar untuk mengakses AutoPrime</p>
+        </div>
+
+        <!-- Error dari server -->
+        <div th:if="${registerError}" class="alert-box alert-error">
+          <i class="bi bi-exclamation-circle-fill"></i>
+          <span th:text="${registerError}"></span>
+        </div>
+
+        <form id="registerForm" action="/registerForm" method="POST" novalidate>
+
+          <div class="form-group">
+            <div class="input-wrapper">
+              <input type="text" id="reg_nama" name="nama" placeholder=" " required autocomplete="name"/>
+              <label for="reg_nama">Nama Lengkap</label>
+            </div>
+            <span class="error-message" id="namaError"></span>
+          </div>
+
+          <div class="form-group">
+            <div class="input-wrapper">
+              <input type="text" id="reg_username" name="username" placeholder=" " required autocomplete="username"
+                     oninput="checkUsername(this.value)"/>
+              <label for="reg_username">Username</label>
+            </div>
+            <span class="error-message" id="regUsernameError"></span>
+            <span id="usernameOk" style="font-size:12px;color:#00A650;display:none">
+              <i class="bi bi-check-circle-fill"></i> Username tersedia
+            </span>
+          </div>
+
+          <div class="form-group">
+            <div class="input-wrapper password-wrapper">
+              <input type="password" id="reg_password" name="password" placeholder=" " required
+                     oninput="checkStrength(this.value)"/>
+              <label for="reg_password">Password</label>
+              <button type="button" class="password-toggle" onclick="togglePw('reg_password','eyeReg1')" aria-label="Toggle">
+                <i class="bi bi-eye" id="eyeReg1"></i>
+              </button>
+            </div>
+            <div id="strengthBar" class="strength-bar" style="background:#DDE1EA;width:0%"></div>
+            <div id="strengthLabel" class="strength-label" style="color:var(--muted)"></div>
+            <span class="error-message" id="regPassError"></span>
+          </div>
+
+          <div class="form-group">
+            <div class="input-wrapper password-wrapper">
+              <input type="password" id="reg_confirm" name="confirmPassword" placeholder=" " required
+                     oninput="checkMatch()"/>
+              <label for="reg_confirm">Konfirmasi Password</label>
+              <button type="button" class="password-toggle" onclick="togglePw('reg_confirm','eyeReg2')" aria-label="Toggle">
+                <i class="bi bi-eye" id="eyeReg2"></i>
+              </button>
+            </div>
+            <span class="error-message" id="confirmError"></span>
+          </div>
+
+          <button type="submit" class="login-btn" onclick="return validateRegister()">Daftar</button>
+        </form>
+
+        <div class="signup-link" style="margin-top:20px">
+          <p>Sudah punya akun? <a href="#" onclick="switchTo('login'); return false;">Masuk di sini</a></p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  // Jika server mengirim showRegister=true, langsung buka form register
+  const showReg = /*[[${showRegister}]]*/ false;
+  if (showReg) switchTo('register');
+
+  // ── Ganti panel login ↔ register ──────────────────────────────────────
+  function switchTo(panel) {
+    document.getElementById('loginSection').classList.toggle('active', panel === 'login');
+    document.getElementById('registerSection').classList.toggle('active', panel === 'register');
+  }
+
+  // ── Toggle tampil/sembunyikan password ────────────────────────────────
+  function togglePw(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon  = document.getElementById(iconId);
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.className = 'bi bi-eye-slash';
+    } else {
+      input.type = 'password';
+      icon.className = 'bi bi-eye';
+    }
+  }
+
+  // ── Cek ketersediaan username (debounce 500ms) ────────────────────────
+  let usernameTimer;
+  function checkUsername(val) {
+    clearTimeout(usernameTimer);
+    const err = document.getElementById('regUsernameError');
+    const ok  = document.getElementById('usernameOk');
+    err.textContent = '';
+    ok.style.display = 'none';
+    if (val.length < 3) return;
+    usernameTimer = setTimeout(() => {
+      fetch('/checkUsername?username=' + encodeURIComponent(val))
+        .then(r => r.json())
+        .then(data => {
+          if (data.taken) {
+            err.textContent = 'Username sudah digunakan.';
+            ok.style.display = 'none';
+          } else {
+            err.textContent = '';
+            ok.style.display = 'block';
+          }
+        })
+        .catch(() => {}); // jika endpoint belum ada, diam saja
+    }, 500);
+  }
+
+  // ── Strength meter password ────────────────────────────────────────────
+  function checkStrength(val) {
+    const bar   = document.getElementById('strengthBar');
+    const label = document.getElementById('strengthLabel');
+    let score = 0;
+    if (val.length >= 6)  score++;
+    if (val.length >= 10) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+
+    const levels = [
+      { w: '20%', color: '#D0021B', text: 'Sangat lemah' },
+      { w: '40%', color: '#F5A623', text: 'Lemah' },
+      { w: '60%', color: '#F5A623', text: 'Sedang' },
+      { w: '80%', color: '#00A650', text: 'Kuat' },
+      { w: '100%', color: '#00A650', text: 'Sangat kuat' },
+    ];
+    if (val.length === 0) { bar.style.width = '0'; label.textContent = ''; return; }
+    const lvl = levels[Math.min(score - 1, 4)] || levels[0];
+    bar.style.width = lvl.w;
+    bar.style.background = lvl.color;
+    label.textContent = lvl.text;
+    label.style.color = lvl.color;
+  }
+
+  // ── Cek kesesuaian konfirmasi password ────────────────────────────────
+  function checkMatch() {
+    const pw  = document.getElementById('reg_password').value;
+    const con = document.getElementById('reg_confirm').value;
+    const err = document.getElementById('confirmError');
+    if (con.length === 0) { err.textContent = ''; return; }
+    err.textContent = pw === con ? '' : 'Password tidak cocok.';
+  }
+
+  // ── Validasi form register sebelum submit ─────────────────────────────
+  function validateRegister() {
+    const nama     = document.getElementById('reg_nama').value.trim();
+    const username = document.getElementById('reg_username').value.trim();
+    const pw       = document.getElementById('reg_password').value;
+    const con      = document.getElementById('reg_confirm').value;
+
+    let valid = true;
+
+    if (nama.length < 2) {
+      document.getElementById('namaError').textContent = 'Nama minimal 2 karakter.';
+      valid = false;
+    } else {
+      document.getElementById('namaError').textContent = '';
+    }
+
+    if (username.length < 3) {
+      document.getElementById('regUsernameError').textContent = 'Username minimal 3 karakter.';
+      valid = false;
+    } else {
+      document.getElementById('regUsernameError').textContent = '';
+    }
+
+    if (pw.length < 6) {
+      document.getElementById('regPassError').textContent = 'Password minimal 6 karakter.';
+      valid = false;
+    } else {
+      document.getElementById('regPassError').textContent = '';
+    }
+
+    if (pw !== con) {
+      document.getElementById('confirmError').textContent = 'Password tidak cocok.';
+      valid = false;
+    } else {
+      document.getElementById('confirmError').textContent = '';
+    }
+
+    return valid;
+  }
+</script>
 </body>
 </html>
-
-<script>
-    // Basic Login Form
-class BasicLoginForm extends FormUtils.LoginFormBase {
-    constructor() {
-        super({
-            hideOnSuccess: ['.signup-link'],
-        });
-    }
-
-    decorate() {
-        FormUtils.addEntranceAnimation(this.form.closest('.login-card'), 100);
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => new BasicLoginForm());
-</script>

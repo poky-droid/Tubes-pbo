@@ -1,7 +1,7 @@
 package com.example.demo.model;
 
 
-public class Owner extends User {
+public class owner extends user {
     public void kelolaKendaraan(){
 
     }

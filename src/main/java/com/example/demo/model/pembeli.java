@@ -1,6 +1,6 @@
 package com.example.demo.model;
 
-public class Pembeli {
+public class pembeli {
 
     public void ajukanPembelian() {
     }

@@ -1,11 +1,11 @@
 package com.example.demo.model;
 
-public class Penjualan {
+public class penjualan {
     private int idPenjualan;
     private int tanggalPenjualan;
     private boolean statusPenjualan;
 
-    public Penjualan(int idPenjualan, int tanggalPenjualan, boolean statusPenjualan) {
+    public penjualan(int idPenjualan, int tanggalPenjualan, boolean statusPenjualan) {
         this.idPenjualan = idPenjualan;
         this.tanggalPenjualan = tanggalPenjualan;
         this.statusPenjualan = statusPenjualan;

@@ -1,13 +1,13 @@
 package com.example.demo.model;
 
-public class User {
+public class user {
 
     private int idUser;
     private String nama;
     private String email;
     private String password;
 
-    public User() {
+    public user() {
 
     }
 
