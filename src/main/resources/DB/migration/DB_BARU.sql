@@ -6,6 +6,8 @@
 -- Generation Time: Jun 05, 2026 at 04:59 PM
 -- Server version: 8.0.42
 -- PHP Version: 8.3.30
+CREATE DATABASE tubes_pbo;
+USE tubes_pbo;
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
