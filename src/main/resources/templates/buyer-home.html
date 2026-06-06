@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoPrime — Katalog Kendaraan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/ap-buyer.css">
+</head>
+<body>
+
+<!-- DESKTOP NAV -->
+<nav class="ap-nav">
+    <div class="nav-inner">
+        <a href="/buyer/home" class="nav-logo">AutoPrime</a>
+        <div class="nav-links">
+            <a href="/buyer/home"     class="nav-active"><i class="bi bi-grid-3x3-gap-fill"></i> Katalog</a>
+            <a href="/buyer/testdrive"><i class="bi bi-calendar-check"></i> Test Drive</a>
+            <a href="/buyer/pesanan"> <i class="bi bi-bag-check"></i> Pesanan</a>
+            <a href="/buyer/profil">  <i class="bi bi-person-circle"></i> Profil</a>
+        </div>
+        <div class="nav-right">
+            <span class="nav-user" th:text="${nama}">Pengguna</span>
+            <a href="/logout" class="btn-nav"><i class="bi bi-box-arrow-right"></i> Keluar</a>
+        </div>
+    </div>
+</nav>
+
+<!-- MOBILE BAR -->
+<div class="mob-bar">
+    <a href="/buyer/home" class="mob-logo">AutoPrime</a>
+    <button class="mob-btn" onclick="openDrawer()"><i class="bi bi-list"></i></button>
+</div>
+<div class="mob-overlay" id="mobOverlay" onclick="closeDrawer()"></div>
+<div class="mob-drawer" id="mobDrawer">
+    <div class="drawer-top">
+        <span class="mob-logo">AutoPrime</span>
+        <button class="drawer-close" onclick="closeDrawer()"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="drawer-nav">
+        <a href="/buyer/home"      class="nav-active"><i class="bi bi-grid-3x3-gap-fill"></i> Katalog</a>
+        <a href="/buyer/testdrive"><i class="bi bi-calendar-check"></i> Test Drive</a>
+        <a href="/buyer/pesanan"> <i class="bi bi-bag-check"></i> Pesanan</a>
+        <a href="/buyer/profil">  <i class="bi bi-person-circle"></i> Profil</a>
+        <a href="/logout" class="nav-logout"><i class="bi bi-box-arrow-right"></i> Keluar</a>
+    </div>
+    <div class="drawer-foot" th:text="'Halo, ' + ${nama}">Halo, Pengguna</div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-car-bg"><i class="bi bi-car-front-fill"></i></div>
+    <div class="hero-content">
+        <div class="hero-eyebrow">AutoPrime Showroom</div>
+        <h1>Temukan Kendaraan<br><em>Impian Anda</em></h1>
+        <p class="hero-sub">Koleksi kendaraan pilihan terbaik untuk menemani setiap perjalanan Anda</p>
+        <div class="hero-btns">
+            <a href="#catalog" class="ap-btn primary"><i class="bi bi-grid-3x3-gap-fill"></i> Lihat Semua</a>
+            <a href="/buyer/testdrive" class="ap-btn secondary"><i class="bi bi-calendar-check"></i> Test Drive</a>
+        </div>
+    </div>
+    <div class="hero-scroll"><i class="bi bi-chevron-down"></i></div>
+</section>
+
+<!-- STATS -->
+<section class="stats-section">
+    <div class="stats-grid">
+        <div class="stat-block"><div class="stat-num" id="statTotal">0</div><div class="stat-lbl">Total Kendaraan</div></div>
+        <div class="stat-block"><div class="stat-num" id="statTersedia">0</div><div class="stat-lbl">Tersedia</div></div>
+        <div class="stat-block"><div class="stat-num" id="statTerjual">0</div><div class="stat-lbl">Terjual</div></div>
+    </div>
+</section>
+
+<!-- CATALOG -->
+<section class="catalog-section" id="catalog">
+    <div class="catalog-header">
+        <h2>Koleksi Kendaraan</h2>
+        <p>Jelajahi seluruh pilihan kendaraan kami</p>
+    </div>
+
+    <div class="filter-bar">
+        <div class="filter-pills" id="statusPills">
+            <button class="f-pill pill-active" data-status="">Semua</button>
+            <button class="f-pill" data-status="tersedia">Tersedia</button>
+            <button class="f-pill" data-status="booking">Booking</button>
+            <button class="f-pill" data-status="terjual">Terjual</button>
+        </div>
+        <div class="filter-divider"></div>
+        <input type="text" class="ap-input" id="searchInput" placeholder="Cari merek atau model...">
+        <select class="ap-input" id="filterTahun" style="min-width:120px">
+            <option value="">Semua Tahun</option>
+        </select>
+        <div class="filter-right">
+            <span class="result-count" id="countChip"></span>
+            <button class="ap-btn ghost-dark sm" onclick="resetFilters()"><i class="bi bi-arrow-clockwise"></i> Reset</button>
+        </div>
+    </div>
+
+    <div class="vehicle-grid" id="vehicleGrid">
+        <th:block th:each="k : ${kendaraan}">
+            <div class="v-item" th:attr="data-merk=${k.merk},data-model=${k.model},data-status=${k.status},data-tahun=${k.tahun}">
+                <div class="vcard">
+                    <div class="vcard-thumb">
+                        <i class="bi bi-car-front-fill vcard-thumb-icon"></i>
+                        <div class="vcard-badge">
+                            <span class="ap-badge" th:classappend="'badge-' + ${k.status}" th:text="${k.status}">tersedia</span>
+                        </div>
+                    </div>
+                    <div class="vcard-body">
+                        <div class="vcard-name" th:text="${k.merk + ' ' + k.model}">Honda Beat</div>
+                        <div class="vcard-year"><i class="bi bi-calendar3"></i><span th:text="'Tahun ' + ${k.tahun}">Tahun 2023</span></div>
+                        <div class="vcard-price">
+                            <span class="price-prefix">Rp </span><th:block th:text="${#numbers.formatDecimal(k.harga,1,'COMMA',0,'POINT')}">25.000.000</th:block>
+                        </div>
+                        <div class="vcard-actions">
+                            <a th:href="@{/buyer/testdrive(kendaraan=${k.idKendaraan})}" class="ap-btn dark wide" th:if="${k.status == 'tersedia'}">
+                                <i class="bi bi-calendar-plus"></i> Jadwalkan Test Drive
+                            </a>
+                            <button class="ap-btn disabled wide" th:if="${k.status != 'tersedia'}" disabled>
+                                <i class="bi bi-x-circle"></i> Tidak Tersedia
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </th:block>
+
+        <div th:if="${#lists.isEmpty(kendaraan)}" class="ap-empty" style="grid-column:1/-1">
+            <div class="ap-empty-icon"><i class="bi bi-car-front"></i></div>
+            <h3>Belum ada kendaraan</h3>
+            <p>Stok kendaraan akan segera diperbarui. Silakan kembali nanti.</p>
+        </div>
+    </div>
+
+    <div id="noResult" class="ap-empty" style="display:none">
+        <div class="ap-empty-icon"><i class="bi bi-search"></i></div>
+        <h3>Tidak ada hasil</h3>
+        <p>Coba ubah kata kunci atau filter pencarian Anda.</p>
+        <button class="ap-btn ghost-dark sm" onclick="resetFilters()" style="margin-top:1rem"><i class="bi bi-arrow-clockwise"></i> Reset Filter</button>
+    </div>
+</section>
+
+<footer class="ap-footer">
+    <p>&copy; 2024 <strong>AutoPrime</strong> &mdash; Showroom Kendaraan Premium</p>
+</footer>
+
+<script>
+function openDrawer()  { document.getElementById('mobDrawer').classList.add('is-open'); document.getElementById('mobOverlay').classList.add('is-open'); }
+function closeDrawer() { document.getElementById('mobDrawer').classList.remove('is-open'); document.getElementById('mobOverlay').classList.remove('is-open'); }
+
+const items = [...document.querySelectorAll('.v-item')];
+const years = [...new Set(items.map(i => i.dataset.tahun))].sort((a,b) => b - a);
+const ySel  = document.getElementById('filterTahun');
+years.forEach(y => { const o = document.createElement('option'); o.value = y; o.textContent = y; ySel.appendChild(o); });
+
+function calcStats() {
+    document.getElementById('statTotal').textContent    = items.length;
+    document.getElementById('statTersedia').textContent = items.filter(i => i.dataset.status === 'tersedia').length;
+    document.getElementById('statTerjual').textContent  = items.filter(i => i.dataset.status === 'terjual').length;
+}
+calcStats();
+
+let activeStatus = '';
+function applyFilter() {
+    const q  = document.getElementById('searchInput').value.toLowerCase();
+    const yr = document.getElementById('filterTahun').value;
+    let visible = 0;
+    items.forEach(item => {
+        const label = (item.dataset.merk + ' ' + item.dataset.model).toLowerCase();
+        const show  = (!q || label.includes(q)) && (!activeStatus || item.dataset.status === activeStatus) && (!yr || item.dataset.tahun === yr);
+        item.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    document.getElementById('countChip').textContent = visible + ' kendaraan';
+    document.getElementById('noResult').style.display = (visible === 0 && items.length > 0) ? 'block' : 'none';
+}
+function resetFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filterTahun').value = '';
+    activeStatus = '';
+    document.querySelectorAll('.f-pill').forEach(p => p.classList.remove('pill-active'));
+    document.querySelector('.f-pill[data-status=""]').classList.add('pill-active');
+    applyFilter();
+}
+document.querySelectorAll('.f-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+        document.querySelectorAll('.f-pill').forEach(p => p.classList.remove('pill-active'));
+        pill.classList.add('pill-active');
+        activeStatus = pill.dataset.status;
+        applyFilter();
+    });
+});
+document.getElementById('searchInput').addEventListener('input', applyFilter);
+document.getElementById('filterTahun').addEventListener('change', applyFilter);
+applyFilter();
+
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); }
+    });
+});
+</script>
+</body>
+</html>

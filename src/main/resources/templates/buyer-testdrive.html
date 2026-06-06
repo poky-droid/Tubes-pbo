@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoPrime — Test Drive</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/ap-buyer.css">
+</head>
+<body>
+
+<!-- DESKTOP NAV -->
+<nav class="ap-nav">
+    <div class="nav-inner">
+        <a href="/buyer/home" class="nav-logo">AutoPrime</a>
+        <div class="nav-links">
+            <a href="/buyer/home">     <i class="bi bi-grid-3x3-gap-fill"></i> Katalog</a>
+            <a href="/buyer/testdrive" class="nav-active"><i class="bi bi-calendar-check"></i> Test Drive</a>
+            <a href="/buyer/pesanan">  <i class="bi bi-bag-check"></i> Pesanan</a>
+            <a href="/buyer/profil">   <i class="bi bi-person-circle"></i> Profil</a>
+        </div>
+        <div class="nav-right">
+            <span class="nav-user" th:text="${nama}">Pengguna</span>
+            <a href="/logout" class="btn-nav"><i class="bi bi-box-arrow-right"></i> Keluar</a>
+        </div>
+    </div>
+</nav>
+
+<!-- MOBILE BAR -->
+<div class="mob-bar">
+    <a href="/buyer/home" class="mob-logo">AutoPrime</a>
+    <button class="mob-btn" onclick="openDrawer()"><i class="bi bi-list"></i></button>
+</div>
+<div class="mob-overlay" id="mobOverlay" onclick="closeDrawer()"></div>
+<div class="mob-drawer" id="mobDrawer">
+    <div class="drawer-top">
+        <span class="mob-logo">AutoPrime</span>
+        <button class="drawer-close" onclick="closeDrawer()"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="drawer-nav">
+        <a href="/buyer/home">     <i class="bi bi-grid-3x3-gap-fill"></i> Katalog</a>
+        <a href="/buyer/testdrive" class="nav-active"><i class="bi bi-calendar-check"></i> Test Drive</a>
+        <a href="/buyer/pesanan">  <i class="bi bi-bag-check"></i> Pesanan</a>
+        <a href="/buyer/profil">   <i class="bi bi-person-circle"></i> Profil</a>
+        <a href="/logout" class="nav-logout"><i class="bi bi-box-arrow-right"></i> Keluar</a>
+    </div>
+    <div class="drawer-foot" th:text="'Halo, ' + ${nama}">Halo, Pengguna</div>
+</div>
+
+<!-- PAGE BANNER -->
+<div class="ap-page">
+    <div class="page-banner">
+        <div class="page-banner-inner">
+            <div class="banner-tag">AutoPrime</div>
+            <h1>Jadwal Test Drive</h1>
+            <p>Pilih kendaraan dan tentukan waktu yang sesuai dengan Anda</p>
+        </div>
+    </div>
+
+    <div class="page-content">
+        <div class="two-col">
+
+            <!-- FORM -->
+            <div>
+                <div class="form-card">
+                    <div class="form-card-head">
+                        <i class="bi bi-plus-circle" style="color:var(--g500)"></i>
+                        <h5>Buat Jadwal Baru</h5>
+                    </div>
+                    <div class="form-card-body">
+
+                        <div th:if="${#lists.isEmpty(kendaraanList)}" class="info-box warn">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            Tidak ada kendaraan tersedia untuk test drive saat ini.
+                        </div>
+
+                        <form th:unless="${#lists.isEmpty(kendaraanList)}" action="/buyer/testdrive" method="POST">
+
+                            <div class="mb-3">
+                                <label class="ap-label">Pilih Kendaraan <span style="color:#ef4444">*</span></label>
+                                <select class="ap-control" name="idKendaraan" required>
+                                    <option value="">-- Pilih Kendaraan --</option>
+                                    <option th:each="k : ${kendaraanList}"
+                                            th:value="${k.idKendaraan}"
+                                            th:text="${k.merk + ' ' + k.model + ' (' + k.tahun + ')'}"
+                                            th:selected="${selectedKendaraan != null and selectedKendaraan == k.idKendaraan}">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="ap-label">Tanggal Test Drive <span style="color:#ef4444">*</span></label>
+                                <input type="date" class="ap-control" name="tanggal" id="tdDate" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="ap-label">Jam Kunjungan <span style="color:#ef4444">*</span></label>
+                                <select class="ap-control" name="jam" required>
+                                    <option value="">-- Pilih Jam --</option>
+                                    <option value="08:00">08:00 WIB — Pagi</option>
+                                    <option value="09:00">09:00 WIB — Pagi</option>
+                                    <option value="10:00">10:00 WIB — Pagi</option>
+                                    <option value="11:00">11:00 WIB — Siang</option>
+                                    <option value="13:00">13:00 WIB — Siang</option>
+                                    <option value="14:00">14:00 WIB — Siang</option>
+                                    <option value="15:00">15:00 WIB — Sore</option>
+                                    <option value="16:00">16:00 WIB — Sore</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="ap-label">Catatan <span style="color:var(--g400);font-weight:400">(opsional)</span></label>
+                                <textarea class="ap-control" name="catatan" rows="3"
+                                          placeholder="Contoh: Tertarik dengan warna merah, ingin coba di jalan tol..."></textarea>
+                            </div>
+
+                            <div class="info-box blue">
+                                <i class="bi bi-info-circle-fill"></i>
+                                Test drive berlangsung ±30 menit. Pastikan hadir tepat waktu. Konfirmasi akan diberikan oleh tim kami.
+                            </div>
+
+                            <button type="submit" class="ap-btn dark wide" style="padding:.72rem">
+                                <i class="bi bi-calendar-plus"></i> Jadwalkan Test Drive
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- HISTORY -->
+            <div>
+                <div class="sec-header">
+                    <span class="sec-title"><i class="bi bi-list-check" style="margin-right:.4rem"></i>Jadwal Saya</span>
+                    <span class="sec-count" th:text="${#lists.size(myTestdrives)} + ' Jadwal'">0 Jadwal</span>
+                </div>
+
+                <div th:if="${#lists.isEmpty(myTestdrives)}" class="ap-empty" style="padding:4rem 2rem">
+                    <div class="ap-empty-icon"><i class="bi bi-calendar-x"></i></div>
+                    <h3>Belum ada jadwal</h3>
+                    <p>Buat jadwal test drive dari form di samping</p>
+                </div>
+
+                <ul class="tl-list" th:unless="${#lists.isEmpty(myTestdrives)}">
+                    <li class="tl-item" th:each="td : ${myTestdrives}">
+                        <div class="tl-dot"><i class="bi bi-car-front"></i></div>
+                        <div class="tl-box">
+                            <div class="tl-top">
+                                <div class="tl-name"
+                                     th:text="${kendaraanMap[td.idKendaraan] != null ?
+                                         kendaraanMap[td.idKendaraan].merk + ' ' + kendaraanMap[td.idKendaraan].model :
+                                         'Kendaraan #' + td.idKendaraan}">Kendaraan</div>
+                                <span class="ap-badge" th:classappend="'badge-' + ${td.status}" th:text="${td.status}">menunggu</span>
+                            </div>
+                            <div class="tl-meta">
+                                <i class="bi bi-calendar3"></i>
+                                <span th:text="${#temporals.format(td.tanggal,'dd MMMM yyyy')}"></span>
+                                &nbsp;&bull;&nbsp;
+                                <i class="bi bi-clock"></i>
+                                <span th:text="${#temporals.format(td.jam,'HH:mm') + ' WIB'}"></span>
+                            </div>
+                            <div class="tl-meta" th:if="${td.catatan != null and !#strings.isEmpty(td.catatan)}" style="font-style:italic;margin-top:.2rem">
+                                <i class="bi bi-chat-text"></i>
+                                <span th:text="${td.catatan}"></span>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="ap-footer">
+        <p>&copy; 2024 <strong>AutoPrime</strong> &mdash; Showroom Kendaraan Premium</p>
+    </footer>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+<span th:if="${success}" id="flashSuccess" th:attr="data-msg=${success}" style="display:none"></span>
+<span th:if="${error}"   id="flashError"   th:attr="data-msg=${error}"   style="display:none"></span>
+
+<script>
+function openDrawer()  { document.getElementById('mobDrawer').classList.add('is-open'); document.getElementById('mobOverlay').classList.add('is-open'); }
+function closeDrawer() { document.getElementById('mobDrawer').classList.remove('is-open'); document.getElementById('mobOverlay').classList.remove('is-open'); }
+
+const d = new Date().toISOString().split('T')[0];
+const dateEl = document.getElementById('tdDate');
+if (dateEl) dateEl.min = d;
+
+function showToast(type, msg) {
+    const wrap = document.getElementById('toastWrap');
+    const div  = document.createElement('div');
+    div.className = 'toast-card ' + type;
+    div.innerHTML = `<div class="t-icon"><i class="bi bi-${type==='success'?'check-lg':'exclamation-lg'}"></i></div>
+        <div class="t-body"><div class="t-title">${type==='success'?'Berhasil!':'Gagal'}</div><div class="t-msg">${msg}</div></div>
+        <button class="t-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>`;
+    wrap.appendChild(div);
+    setTimeout(() => div.remove(), 5000);
+}
+const fs = document.getElementById('flashSuccess');
+const fe = document.getElementById('flashError');
+if (fs) showToast('success', fs.dataset.msg);
+if (fe) showToast('error',   fe.dataset.msg);
+</script>
+</body>
+</html>

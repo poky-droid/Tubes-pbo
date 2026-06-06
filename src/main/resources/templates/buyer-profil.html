@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoPrime — Profil Saya</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/ap-buyer.css">
+</head>
+<body>
+
+<!-- DESKTOP NAV -->
+<nav class="ap-nav">
+    <div class="nav-inner">
+        <a href="/buyer/home" class="nav-logo">AutoPrime</a>
+        <div class="nav-links">
+            <a href="/buyer/home">    <i class="bi bi-grid-3x3-gap-fill"></i> Katalog</a>
+            <a href="/buyer/testdrive"><i class="bi bi-calendar-check"></i> Test Drive</a>
+            <a href="/buyer/pesanan"> <i class="bi bi-bag-check"></i> Pesanan</a>
+            <a href="/buyer/profil"   class="nav-active"><i class="bi bi-person-circle"></i> Profil</a>
+        </div>
+        <div class="nav-right">
+            <span class="nav-user" th:text="${nama}">Pengguna</span>
+            <a href="/logout" class="btn-nav"><i class="bi bi-box-arrow-right"></i> Keluar</a>
+        </div>
+    </div>
+</nav>
+
+<!-- MOBILE BAR -->
+<div class="mob-bar">
+    <a href="/buyer/home" class="mob-logo">AutoPrime</a>
+    <button class="mob-btn" onclick="openDrawer()"><i class="bi bi-list"></i></button>
+</div>
+<div class="mob-overlay" id="mobOverlay" onclick="closeDrawer()"></div>
+<div class="mob-drawer" id="mobDrawer">
+    <div class="drawer-top">
+        <span class="mob-logo">AutoPrime</span>
+        <button class="drawer-close" onclick="closeDrawer()"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="drawer-nav">
+        <a href="/buyer/home">    <i class="bi bi-grid-3x3-gap-fill"></i> Katalog</a>
+        <a href="/buyer/testdrive"><i class="bi bi-calendar-check"></i> Test Drive</a>
+        <a href="/buyer/pesanan"> <i class="bi bi-bag-check"></i> Pesanan</a>
+        <a href="/buyer/profil"   class="nav-active"><i class="bi bi-person-circle"></i> Profil</a>
+        <a href="/logout" class="nav-logout"><i class="bi bi-box-arrow-right"></i> Keluar</a>
+    </div>
+    <div class="drawer-foot" th:text="'Halo, ' + ${nama}">Halo, Pengguna</div>
+</div>
+
+<!-- PAGE -->
+<div class="ap-page">
+    <div class="page-banner">
+        <div class="page-banner-inner">
+            <div class="banner-tag">AutoPrime</div>
+            <h1>Profil Saya</h1>
+            <p>Kelola informasi akun Anda</p>
+        </div>
+    </div>
+
+    <div class="page-content">
+        <div class="center-col">
+
+            <!-- PROFILE CARD -->
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-ava"><i class="bi bi-person-fill"></i></div>
+                    <div class="profile-name" th:text="${user.nama}">Nama User</div>
+                    <div class="profile-un"><i class="bi bi-at"></i><span th:text="${user.username}">username</span></div>
+                    <div class="profile-role-badge"><i class="bi bi-person-check"></i> Pembeli</div>
+                </div>
+                <div class="profile-body">
+                    <div class="profile-section-title">Edit Informasi</div>
+                    <form action="/buyer/profil" method="POST">
+                        <div class="mb-3">
+                            <label class="ap-label">Nama Lengkap</label>
+                            <input type="text" class="ap-control" name="nama"
+                                   th:value="${user.nama}" placeholder="Masukkan nama lengkap" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="ap-label">Username</label>
+                            <input type="text" class="ap-control" th:value="${user.username}" disabled>
+                            <div class="field-note"><i class="bi bi-lock"></i> Username tidak dapat diubah</div>
+                        </div>
+                        <button type="submit" class="ap-btn dark wide" style="padding:.72rem">
+                            <i class="bi bi-check2-circle"></i> Simpan Perubahan
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- QUICK LINKS -->
+            <div class="quick-grid">
+                <a href="/buyer/testdrive" class="quick-card">
+                    <div class="quick-icon" style="background:#ede9fe;color:#6366f1"><i class="bi bi-calendar-check"></i></div>
+                    <div><div class="quick-label">Test Drive</div><div class="quick-sub">Lihat jadwal</div></div>
+                </a>
+                <a href="/buyer/pesanan" class="quick-card">
+                    <div class="quick-icon" style="background:#d1fae5;color:#059669"><i class="bi bi-bag-check"></i></div>
+                    <div><div class="quick-label">Pesanan</div><div class="quick-sub">Riwayat beli</div></div>
+                </a>
+                <a href="/buyer/home" class="quick-card">
+                    <div class="quick-icon" style="background:#dbeafe;color:#2563eb"><i class="bi bi-grid-3x3-gap"></i></div>
+                    <div><div class="quick-label">Katalog</div><div class="quick-sub">Cari kendaraan</div></div>
+                </a>
+                <a href="/logout" class="quick-card danger">
+                    <div class="quick-icon" style="background:#fee2e2;color:#ef4444"><i class="bi bi-box-arrow-right"></i></div>
+                    <div><div class="quick-label" style="color:#ef4444">Keluar</div><div class="quick-sub">Logout akun</div></div>
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="ap-footer">
+        <p>&copy; 2024 <strong>AutoPrime</strong> &mdash; Showroom Kendaraan Premium</p>
+    </footer>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+<span th:if="${success}" id="flashSuccess" th:attr="data-msg=${success}" style="display:none"></span>
+
+<script>
+function openDrawer()  { document.getElementById('mobDrawer').classList.add('is-open'); document.getElementById('mobOverlay').classList.add('is-open'); }
+function closeDrawer() { document.getElementById('mobDrawer').classList.remove('is-open'); document.getElementById('mobOverlay').classList.remove('is-open'); }
+
+function showToast(type, msg) {
+    const wrap = document.getElementById('toastWrap');
+    const div  = document.createElement('div');
+    div.className = 'toast-card ' + type;
+    div.innerHTML = `<div class="t-icon"><i class="bi bi-${type==='success'?'check-lg':'exclamation-lg'}"></i></div>
+        <div class="t-body"><div class="t-title">${type==='success'?'Tersimpan!':'Gagal'}</div><div class="t-msg">${msg}</div></div>
+        <button class="t-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>`;
+    wrap.appendChild(div);
+    setTimeout(() => div.remove(), 5000);
+}
+const fs = document.getElementById('flashSuccess');
+if (fs) showToast('success', fs.dataset.msg);
+</script>
+</body>
+</html>
