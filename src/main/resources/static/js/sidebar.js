@@ -19,7 +19,7 @@ function renderSidebar(activePage) {
 
   document.getElementById('sidebar').innerHTML = `
     <div class="sidebar-brand">
-      <div class="brand-name">AutoPrime</div>
+      <div class="brand-name">Artomoro Showroom</div>
       <div class="brand-sub">Showroom Management</div>
     </div>
     <nav class="sidebar-nav mt-1">

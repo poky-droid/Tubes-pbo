@@ -1,28 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --olx-blue:    #23408e;
-  --olx-blue-lt: #e8edf7;
+  --olx-blue:    #111;
+  --olx-blue-lt: #f3f3f3;
   --olx-green:   #00a65a;
   --olx-red:     #e53935;
   --olx-orange:  #f57c00;
   --olx-gold:    #f9a825;
-  --bg:          #f2f4f7;
+  --bg:          #f3f3f3;
   --bg-2:        #ffffff;
-  --border:      #e0e4ec;
-  --text:        #1a1a2e;
-  --muted:       #7a7f95;
-  --sidebar-bg:  #1a2550;
+  --border:      #e8e8e8;
+  --text:        #111;
+  --muted:       #717171;
+  --sidebar-bg:  #000;
   --sidebar-act: rgba(255,255,255,.1);
 
   /* alias agar komponen lama tetap jalan */
   --gold:        var(--olx-gold);
   --gold-light:  #fdd86a;
-  --dark:        #f2f4f7;
+  --dark:        #f3f3f3;
   --dark-2:      #ffffff;
-  --dark-3:      #f7f8fc;
-  --dark-4:      #e0e4ec;
-  --light:       #1a1a2e;
+  --dark-3:      #fafafa;
+  --dark-4:      #e8e8e8;
+  --light:       #111;
   --green:       var(--olx-green);
   --red:         var(--olx-red);
   --orange:      var(--olx-orange);
@@ -87,8 +87,8 @@ body {
   transition: all .18s;
 }
 .sidebar-nav .nav-link i { font-size: 16px; min-width: 18px; }
-.sidebar-nav .nav-link:hover  { color: #fff; background: var(--sidebar-act); border-left-color: var(--olx-gold); }
-.sidebar-nav .nav-link.active { color: #fff; background: var(--sidebar-act); border-left-color: var(--olx-gold); }
+.sidebar-nav .nav-link:hover  { color: #fff; background: var(--sidebar-act); border-left-color: #fff; }
+.sidebar-nav .nav-link.active { color: #fff; background: var(--sidebar-act); border-left-color: #fff; }
 
 .sidebar-footer {
   margin-top: auto;
@@ -98,9 +98,9 @@ body {
 .sidebar-user { display: flex; align-items: center; gap: 10px; }
 .s-avatar {
   width: 34px; height: 34px; border-radius: 50%;
-  background: var(--olx-gold);
+  background: rgba(255,255,255,.2);
   display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 14px; color: #1a1a2e; flex-shrink: 0;
+  font-weight: 700; font-size: 14px; color: #fff; flex-shrink: 0;
 }
 .s-name { font-weight: 600; font-size: 13px; color: #fff; }
 .s-role { font-size: 11px; color: rgba(255,255,255,.4); }
@@ -146,7 +146,7 @@ body {
   cursor: pointer; transition: background .2s; font-family: 'Inter';
   display: inline-flex; align-items: center; gap: 6px;
 }
-.btn-gold:hover { background: #1a3070; }
+.btn-gold:hover { background: #404040; }
 
 .btn-og {
   background: var(--olx-blue-lt); color: var(--olx-blue);
@@ -288,7 +288,7 @@ body {
 .prog-wrap { background: var(--bg); border-radius: 4px; height: 6px; overflow: hidden; }
 .prog-fill {
   height: 100%; border-radius: 4px;
-  background: linear-gradient(to right, var(--olx-blue), #6a9ff0);
+  background: linear-gradient(to right, #111, #717171);
   transition: width .4s ease;
 }
 
