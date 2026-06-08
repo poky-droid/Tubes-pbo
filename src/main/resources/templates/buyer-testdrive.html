@@ -132,17 +132,17 @@
             <div>
                 <div class="sec-header">
                     <span class="sec-title"><i class="bi bi-list-check" style="margin-right:.4rem"></i>Jadwal Saya</span>
-                    <span class="sec-count" th:text="${#lists.size(myTestdrives)} + ' Jadwal'">0 Jadwal</span>
+                    <span class="sec-count" th:text="${#lists.size(testdriveList)} + ' Jadwal'">0 Jadwal</span>
                 </div>
 
-                <div th:if="${#lists.isEmpty(myTestdrives)}" class="ap-empty" style="padding:4rem 2rem">
+                <div th:if="${#lists.isEmpty(testdriveList)}" class="ap-empty" style="padding:4rem 2rem">
                     <div class="ap-empty-icon"><i class="bi bi-calendar-x"></i></div>
                     <h3>Belum ada jadwal</h3>
                     <p>Buat jadwal test drive dari form di samping</p>
                 </div>
 
-                <ul class="tl-list" th:unless="${#lists.isEmpty(myTestdrives)}">
-                    <li class="tl-item" th:each="td : ${myTestdrives}">
+                <ul class="tl-list" th:unless="${#lists.isEmpty(testdriveList)}">
+                    <li class="tl-item" th:each="td : ${testdriveList}">
                         <div class="tl-dot"><i class="bi bi-car-front"></i></div>
                         <div class="tl-box">
                             <div class="tl-top">

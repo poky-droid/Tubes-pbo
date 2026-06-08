@@ -1,15 +1,16 @@
 package com.example.demo.controller;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import java.util.List;
-import java.util.Map;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 @Controller
 public class dashboardController {
@@ -17,7 +18,7 @@ public class dashboardController {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @GetMapping("/Dashboard") 
+    @GetMapping("/admin/Dashboard") 
     public String showDashboard(Model model) {
 
         // --- LOGIKA AKTIVITAS TERBARU ---
@@ -249,7 +250,7 @@ public class dashboardController {
         model.addAttribute("pctTestDrive", pctTestDrive);
         model.addAttribute("pctTerjual", pctTerjual);
 
-        // Pastikan nama ini sesuai persis dengan nama file HTML-mu (Dasboard.html)
-        return "Dasboard"; 
+        // Pastikan nama ini sesuai persis dengan nama file HTML di folder templates/admin (Dasboard.html)
+        return "admin/Dasboard"; 
     }
 }
