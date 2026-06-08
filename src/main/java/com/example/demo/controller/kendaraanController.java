@@ -32,7 +32,7 @@ public class kendaraanController {
     // Folder: <project_root>/uploads/kendaraan/
     private static final String UPLOAD_DIR = System.getProperty("user.dir") + File.separator + "uploads" + File.separator + "kendaraan" + File.separator;
 
-    @GetMapping("/kendaraan")
+    @GetMapping("/admin/kendaraan")
     public String showKendaraan(Model model) {
 
         String sql = "SELECT k.*, " +
@@ -65,10 +65,10 @@ public class kendaraanController {
         model.addAttribute("totalTersedia", totalTersedia);
         model.addAttribute("listKendaraan", daftarKendaraan);
 
-        return "kendaraan";
+        return "/admin/kendaraan";
     }
 
-    @PostMapping("/kendaraan/tambah")
+    @PostMapping("/admin/kendaraan/tambah")
     public String tambahKendaraan(
             @RequestParam("jenisKendaraan") String jenisKendaraan,
             @RequestParam("merk") String merk,
@@ -125,10 +125,10 @@ public class kendaraanController {
             }
         }
 
-        return "redirect:/kendaraan";
+        return "redirect:/admin/kendaraan";
     }
 
-    @GetMapping("/kendaraan/hapus/{id}")
+    @GetMapping("/admin/kendaraan/hapus/{id}")
     public String hapusKendaraan(@PathVariable("id") Long idKendaraan) {
         try {
             String namaFoto = jdbcTemplate.queryForObject("SELECT foto FROM kendaraan WHERE id_kendaraan = ?", String.class, idKendaraan);
@@ -138,6 +138,6 @@ public class kendaraanController {
         } catch (Exception e) { /* abaikan */ }
 
         jdbcTemplate.update("DELETE FROM kendaraan WHERE id_kendaraan = ?", idKendaraan);
-        return "redirect:/kendaraan";
+        return "redirect:/admin/kendaraan";
     }
 }

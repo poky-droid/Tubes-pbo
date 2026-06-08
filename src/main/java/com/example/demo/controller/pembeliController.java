@@ -1,18 +1,18 @@
 package com.example.demo.controller;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
-import java.util.HashMap;
-
-import java.util.List;
-import java.util.Map;
 
 @Controller
 public class pembeliController {
@@ -20,7 +20,7 @@ public class pembeliController {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @GetMapping("/pembeli")
+    @GetMapping("/admin/pembeli")
     public String showPembeli(Model model) {
         try {
             // --- 1. LOGIKA KARTU STATISTIK PEMBELI ---
@@ -60,17 +60,17 @@ public class pembeliController {
             model.addAttribute("prospekAktif", prospekAktif);
             model.addAttribute("listPembeli", listPembeli);
 
-            return "pembeli"; 
+            return "/admin/pembeli"; 
 
         } catch (Exception e) {
             System.err.println("Error saat memuat halaman pembeli: " + e.getMessage());
             e.printStackTrace();
-            return "pembeli"; 
+            return "/admin/pembeli"; 
         }
     }
 
     // --- 3. LOGIKA TAMBAH PEMBELI BARU ---
-    @PostMapping("/pembeli/tambah")
+    @PostMapping("/admin/pembeli/tambah")
     public String tambahPembeli(
             @RequestParam("nama") String nama,
             @RequestParam("username") String username,
@@ -101,11 +101,11 @@ public class pembeliController {
         
         
 
-        return "redirect:/pembeli";
+        return "redirect:/admin/pembeli";
     }
 
     // --- 4. LOGIKA AMBIL DETAIL PEMBELI (AJAX) ---
-    @GetMapping("/pembeli/detail/{id}")
+    @GetMapping("/admin/pembeli/detail/{id}")
     @ResponseBody
     public Map<String, Object> getDetailPembeli(@PathVariable("id") Integer idPembeli) {
         Map<String, Object> response = new HashMap<>();

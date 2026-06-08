@@ -20,7 +20,7 @@ public class testdriveController {
     
 
     // Admin testdrive page (original)
-    @GetMapping("/testdrive")
+    @GetMapping("/admin/testdrive")
     public String adminShowTestDrive(Model model) {
         
         try {
@@ -79,11 +79,11 @@ public class testdriveController {
             e.printStackTrace();
         }
 
-        return "testdrive"; 
+        return "/admin/testdrive"; 
     }
 
     // --- FUNGSI UNTUK MENANGKAP DATA TAMBAH JADWAL TEST DRIVE ---
-    @PostMapping("/testdrive/tambah")
+    @PostMapping("/admin/testdrive/tambah")
     public String tambahTestDrive(
             @RequestParam("idPembeli") Integer idPembeli,
             @RequestParam("idKendaraan") Integer idKendaraan,
@@ -104,11 +104,11 @@ public class testdriveController {
         }
         
         // Setelah berhasil menyimpan, refresh halaman kembali ke menu test drive
-        return "redirect:/testdrive";
+        return "redirect:/admin/testdrive";
     }
 
     // --- FUNGSI UNTUK MENGUBAH STATUS TEST DRIVE (ACC / TOLAK / SELESAI) ---
-    @PostMapping("/testdrive/updateStatus")
+    @PostMapping("/admin/testdrive/updateStatus")
     public String updateStatusTestDrive(
             @RequestParam("idTestdrive") Integer idTestdrive,
             @RequestParam("status") String status) {
@@ -124,7 +124,7 @@ public class testdriveController {
         }
         
         // Refresh halaman kembali ke menu test drive
-        return "redirect:/testdrive";
+        return "redirect:/admin/testdrive";
     }
 
 

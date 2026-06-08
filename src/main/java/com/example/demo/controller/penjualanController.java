@@ -1,5 +1,8 @@
 package com.example.demo.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
@@ -8,16 +11,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
-import java.util.Map;
-
 @Controller
 public class penjualanController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @GetMapping("/penjualan")
+    @GetMapping("/admin/penjualan")
     public String showPenjualan(Model model) {
         // --- 1. LOGIKA STATISTIK (Menghitung Pendapatan dari Harga Kendaraan) ---
         String sqlPendapatan = "SELECT SUM(k.harga) FROM penjualan p JOIN kendaraan k ON p.id_kendaraan = k.id_kendaraan WHERE p.status = 'Selesai'";
@@ -94,11 +94,11 @@ public class penjualanController {
         model.addAttribute("listKendaraan", listKendaraan);
         model.addAttribute("listPenjualan", listPenjualan);
 
-        return "penjualan";
+        return "/admin/penjualan";
     }
 
     // --- FUNGSI TAMBAH TRANSAKSI (SESUAI STRUKTUR TABEL ASLI) ---
-    @PostMapping("/penjualan/tambah")
+    @PostMapping("/admin/penjualan/tambah")
     public String tambahPenjualan(
             @RequestParam("idPembeli") Integer idPembeli,
             @RequestParam("idKendaraan") Integer idKendaraan,
@@ -118,7 +118,7 @@ public class penjualanController {
     }
     
     // --- FUNGSI UPDATE STATUS PENJUALAN (ACC / TOLAK) ---
-    @PostMapping("/penjualan/updateStatus")
+    @PostMapping("/admin/penjualan/updateStatus")
     public String updateStatusPenjualan(
             @RequestParam("idPenjualan") Integer idPenjualan,
             @RequestParam("status") String status,
@@ -140,6 +140,6 @@ public class penjualanController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "redirect:/penjualan";
+        return "redirect:/admin/penjualan";
     }
 }
