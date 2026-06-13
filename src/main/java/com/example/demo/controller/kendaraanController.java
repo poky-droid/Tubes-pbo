@@ -22,18 +22,24 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 public class kendaraanController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    // Simpan foto di luar classpath agar bisa diakses langsung
-    // Folder: <project_root>/uploads/kendaraan/
     private static final String UPLOAD_DIR = System.getProperty("user.dir") + File.separator + "uploads" + File.separator + "kendaraan" + File.separator;
 
+    private boolean isOwner(HttpSession session) {
+        String role = (String) session.getAttribute("role");
+        return role != null && role.equalsIgnoreCase("owner");
+    }
+
     @GetMapping("/admin/kendaraan")
-    public String showKendaraan(Model model) {
+    public String showKendaraan(Model model, HttpSession session) {  // tambah HttpSession di sini
+        if (!isOwner(session)) return "redirect:/login?accessDenied=true";
 
         String sql = "SELECT k.*, " +
                      "m.transmisi_mobil, m.mesin_mobil, " +
@@ -59,13 +65,14 @@ public class kendaraanController {
             if ("Tersedia".equalsIgnoreCase(status)) totalTersedia++;
         }
 
+        model.addAttribute("nama", session.getAttribute("nama"));
         model.addAttribute("totalStok", totalStok);
         model.addAttribute("totalMobil", totalMobil);
         model.addAttribute("totalMotor", totalMotor);
         model.addAttribute("totalTersedia", totalTersedia);
         model.addAttribute("listKendaraan", daftarKendaraan);
 
-        return "/admin/kendaraan";
+        return "admin/kendaraan";  // hapus leading slash
     }
 
     @PostMapping("/admin/kendaraan/tambah")
@@ -77,8 +84,11 @@ public class kendaraanController {
             @RequestParam("harga") double harga,
             @RequestParam("status") String status,
             @RequestParam(value = "warna", required = false) String warna,
-            @RequestParam(value = "foto", required = false) MultipartFile foto
+            @RequestParam(value = "foto", required = false) MultipartFile foto,
+            HttpSession session
     ) {
+        if (!isOwner(session)) return "redirect:/login?accessDenied=true";
+
         String namaFile = null;
         if (foto != null && !foto.isEmpty()) {
             try {
@@ -117,11 +127,13 @@ public class kendaraanController {
         if (newId != null) {
             long idKendaraan = newId.longValue();
             if (jenisKendaraan.equalsIgnoreCase("Mobil")) {
-                jdbcTemplate.update("INSERT INTO mobil (id_kendaraan, mesin_mobil, jenis_mobil, transmisi_mobil, kapasitas_mobil) VALUES (?, ?, ?, ?, ?)",
-                        idKendaraan, "-", "-", "-", 0);
+                jdbcTemplate.update(
+                    "INSERT INTO mobil (id_kendaraan, mesin_mobil, jenis_mobil, transmisi_mobil, kapasitas_mobil) VALUES (?, ?, ?, ?, ?)",
+                    idKendaraan, "-", "-", "-", 0);
             } else if (jenisKendaraan.equalsIgnoreCase("Motor")) {
-                jdbcTemplate.update("INSERT INTO motor (id_kendaraan, cc, jenis_motor, kapasitas_tangki) VALUES (?, ?, ?, ?)",
-                        idKendaraan, 0, "-", 0.0);
+                jdbcTemplate.update(
+                    "INSERT INTO motor (id_kendaraan, cc, jenis_motor, kapasitas_tangki) VALUES (?, ?, ?, ?)",
+                    idKendaraan, 0, "-", 0.0);
             }
         }
 
@@ -129,9 +141,12 @@ public class kendaraanController {
     }
 
     @GetMapping("/admin/kendaraan/hapus/{id}")
-    public String hapusKendaraan(@PathVariable("id") Long idKendaraan) {
+    public String hapusKendaraan(@PathVariable("id") Long idKendaraan, HttpSession session) {
+        if (!isOwner(session)) return "redirect:/login?accessDenied=true";
+
         try {
-            String namaFoto = jdbcTemplate.queryForObject("SELECT foto FROM kendaraan WHERE id_kendaraan = ?", String.class, idKendaraan);
+            String namaFoto = jdbcTemplate.queryForObject(
+                "SELECT foto FROM kendaraan WHERE id_kendaraan = ?", String.class, idKendaraan);
             if (namaFoto != null && !namaFoto.isEmpty()) {
                 new File(UPLOAD_DIR + namaFoto).delete();
             }

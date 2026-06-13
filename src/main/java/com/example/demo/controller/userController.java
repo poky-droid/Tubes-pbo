@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,12 +17,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.example.demo.model.kendaraan;
 import com.example.demo.model.user;
 
 import jakarta.servlet.http.HttpSession;
 
 @Controller
-public class userController extends user {
+public class userController extends user  {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -104,10 +106,38 @@ public class userController extends user {
     // ── Halaman Buyer Home ────────────────────────────────────────────────
     @RequestMapping(method = RequestMethod.GET, value = "/buyer/home")
     public String buyerHome(Model model, HttpSession session) {
+
         if (session.getAttribute("id_pembeli") == null) {
             return "redirect:/login?sessionExpired=true";
         }
+
+        String sql = """
+            SELECT id_kendaraan, merk, model, tahun, harga, status
+            FROM kendaraan
+            ORDER BY id_kendaraan DESC
+        """;
+
+        List<kendaraan> daftarKendaraan = new ArrayList<>();
+        try {
+            daftarKendaraan = jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> new kendaraan(
+                rs.getLong("id_kendaraan"),  // getLong bukan getInt
+                rs.getString("merk"),
+                rs.getString("model"),
+                rs.getInt("tahun"),
+                rs.getDouble("harga"),
+                rs.getString("status")
+            )
+            );
+        } catch (Exception e) {
+            System.out.println("Error query: " + e.getMessage());
+        }
+
+        System.out.println("Jumlah kendaraan = " + daftarKendaraan.size());
         model.addAttribute("nama", session.getAttribute("nama"));
+        model.addAttribute("kendaraan", daftarKendaraan);
+
         return "index";
     }
 

@@ -124,11 +124,12 @@
             </div>
         </th:block>
 
-        <div th:if="${#lists.isEmpty(kendaraan)}" class="ap-empty" style="grid-column:1/-1">
-            <div class="ap-empty-icon"><i class="bi bi-car-front"></i></div>
-            <h3>Belum ada kendaraan</h3>
-            <p>Stok kendaraan akan segera diperbarui. Silakan kembali nanti.</p>
-        </div>
+
+
+    <div th:if="${kendaraan == null or kendaraan.empty}" class="ap-empty" style="grid-column:1/-1">
+        <div class="ap-empty-icon"><i class="bi bi-car-front"></i></div>
+        <h3>Belum ada kendaraan</h3>
+        <p>Stok kendaraan akan segera diperbarui. Silakan kembali nanti.</p>
     </div>
 
     <div id="noResult" class="ap-empty" style="display:none">

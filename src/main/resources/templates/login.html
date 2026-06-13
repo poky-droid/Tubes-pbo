@@ -50,6 +50,9 @@
             style="color:red; text-align:center; margin-bottom:10px;">
             Sesi Anda telah berakhir. Silakan login kembali.
         </div>
+        <div th:if="${param.accessDenied}" class="alert alert-danger">
+            Anda tidak memiliki akses ke halaman tersebut.
+        </div>
 
       <!-- ════════ FORM LOGIN ════════ -->
       <div class="form-section active" id="loginSection">
