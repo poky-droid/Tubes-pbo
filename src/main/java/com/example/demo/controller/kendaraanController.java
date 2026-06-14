@@ -32,13 +32,15 @@ public class kendaraanController {
 
     private static final String UPLOAD_DIR = System.getProperty("user.dir") + File.separator + "uploads" + File.separator + "kendaraan" + File.separator;
 
-    private boolean isOwner(HttpSession session) {
+    public boolean isOwner(HttpSession session) {
         String role = (String) session.getAttribute("role");
         return role != null && role.equalsIgnoreCase("owner");
     }
 
     @GetMapping("/admin/kendaraan")
     public String showKendaraan(Model model, HttpSession session) {  // tambah HttpSession di sini
+        String role = (String) session.getAttribute("role");
+        System.out.println("=== DEBUG ROLE: " + role + " ===");
         if (!isOwner(session)) return "redirect:/login?accessDenied=true";
 
         String sql = "SELECT k.*, " +

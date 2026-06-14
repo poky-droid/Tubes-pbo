@@ -1,24 +1,26 @@
 package com.example.demo.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import jakarta.servlet.http.HttpSession;
+
 @Controller
-public class laporanController {
+public class laporanController extends BaseController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @GetMapping("/laporan")
-    public String showLaporan(Model model) {
+    @GetMapping("/admin/laporan")
+    public String showLaporan(Model model, HttpSession session) {
+         if (!isOwner(session)) return "redirect:/login?accessDenied=true";
         try {
             // --- 1. KARTU STATISTIK ATAS ---
             
@@ -109,6 +111,6 @@ public class laporanController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "laporan";
+        return "admin/laporan";
     }
 }

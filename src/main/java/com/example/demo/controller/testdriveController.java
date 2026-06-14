@@ -10,9 +10,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
-public class testdriveController {
+public class testdriveController  extends BaseController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -21,7 +22,8 @@ public class testdriveController {
 
     // Admin testdrive page (original)
     @GetMapping("/admin/testdrive")
-    public String adminShowTestDrive(Model model) {
+    public String adminShowTestDrive(Model model, HttpSession session) {
+         if (!isOwner(session)) return "redirect:/login?accessDenied=true";
         
         try {
             // 1. Ambil data Daftar Jadwal Test Drive
@@ -85,12 +87,14 @@ public class testdriveController {
     // --- FUNGSI UNTUK MENANGKAP DATA TAMBAH JADWAL TEST DRIVE ---
     @PostMapping("/admin/testdrive/tambah")
     public String tambahTestDrive(
+            HttpSession session,
             @RequestParam("idPembeli") Integer idPembeli,
             @RequestParam("idKendaraan") Integer idKendaraan,
             @RequestParam("tanggal") String tanggal,
             @RequestParam("jam") String jam,
             @RequestParam("status") String status,
             @RequestParam(value = "catatan", required = false) String catatan) {
+            if (!isOwner(session)) return "redirect:/login?accessDenied=true";
         
         try {
             // Memasukkan data jadwal baru ke dalam tabel testdrive
@@ -110,8 +114,10 @@ public class testdriveController {
     // --- FUNGSI UNTUK MENGUBAH STATUS TEST DRIVE (ACC / TOLAK / SELESAI) ---
     @PostMapping("/admin/testdrive/updateStatus")
     public String updateStatusTestDrive(
+                HttpSession session,
             @RequestParam("idTestdrive") Integer idTestdrive,
             @RequestParam("status") String status) {
+            if (!isOwner(session)) return "redirect:/login?accessDenied=true";
         
         try {
             // Melakukan update status di database berdasarkan ID Test Drive

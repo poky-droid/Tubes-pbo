@@ -1,5 +1,8 @@
 package com.example.demo.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
@@ -7,18 +10,18 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
-import java.util.Map;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
-public class ownerController {
+public class ownerController extends BaseController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @GetMapping("/profil")
-    public String showProfil(Model model, @RequestParam(value = "error", required = false) String error) {
+    @GetMapping("/admin/profil")
+    public String showProfil(Model model, @RequestParam(value = "error", required = false) String error, HttpSession session) {
+        if (!isOwner(session)) return "redirect:/login?accessDenied=true";
+
         try {
             // 1. Ambil data Owner
             String sqlOwner = "SELECT u.id_user, o.id_owner, u.nama, u.username, u.email, o.kontak, o.kota, o.provinsi " +
@@ -63,12 +66,13 @@ public class ownerController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "profil";
+        return "admin/profil";
     }
 
     // --- FUNGSI UPDATE INFORMASI PROFIL ---
-    @PostMapping("/profil/update")
+    @PostMapping("/admin/profil/update")
     public String updateProfil(
+            HttpSession session,
             @RequestParam("idUser") Integer idUser,
             @RequestParam("idOwner") Integer idOwner,
             @RequestParam("nama") String nama,
@@ -77,6 +81,7 @@ public class ownerController {
             @RequestParam("kontak") String kontak,
             @RequestParam("kota") String kota,
             @RequestParam("provinsi") String provinsi) {
+            if (!isOwner(session)) return "redirect:/login?accessDenied=true";
         
         try {
             jdbcTemplate.update("UPDATE `user` SET nama = ?, username = ?, email = ? WHERE id_user = ?", nama, username, email, idUser);
@@ -84,16 +89,18 @@ public class ownerController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "redirect:/profil";
+        return "redirect:/admin/profil";
     }
 
     // --- FUNGSI GANTI PASSWORD ---
-    @PostMapping("/profil/password")
+    @PostMapping("admin/profil/password")
     public String updatePassword(
+            HttpSession session,
             @RequestParam("idUser") Integer idUser,
             @RequestParam("passwordLama") String passwordLama,
             @RequestParam("passwordBaru") String passwordBaru) {
-        
+            if (!isOwner(session)) return "redirect:/login?accessDenied=true";
+
         try {
             String passAsli = jdbcTemplate.queryForObject("SELECT password FROM `user` WHERE id_user = ?", String.class, idUser);
             if (passAsli != null && passAsli.equals(passwordLama)) {
@@ -104,7 +111,7 @@ public class ownerController {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return "redirect:/profil";
+            return "redirect:/admin/profil";
         }
     }
 }

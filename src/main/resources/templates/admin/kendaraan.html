@@ -8,7 +8,6 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
   <link href="/css/style10.css" rel="stylesheet"/>
   <style>
-    /* ── Upload Foto ── */
     .upload-area {
       border: 2px dashed var(--dark-4);
       border-radius: 10px;
@@ -30,7 +29,6 @@
     .upload-text { font-size: 12px; color: var(--muted); }
     .upload-text span { color: var(--gold); font-weight: 600; }
 
-    /* Preview foto yang sudah dipilih */
     #fotoPreviewWrap {
       display: none;
       position: relative;
@@ -50,7 +48,6 @@
     }
     #hapusFotoBtn:hover { background: var(--red); }
 
-    /* Foto di kartu kendaraan */
     .v-thumb-img {
       width: 100%; height: 130px; object-fit: cover;
       border-radius: 8px; margin-bottom: 12px;
@@ -127,11 +124,10 @@
 
         <div class="v-card">
 
-          <!-- Tampilkan foto jika ada, emoji jika tidak -->
-          <div th:if="${k.foto != null and !#strings.isEmpty(k.foto)}" >
-           <img th:src="${k.foto != null and k.foto != '' ? '/uploads/kendaraan' + k.foto : 'https://via.placeholder.com/300x200?text=No+Image'}" 
-     alt="Foto Kendaraan" 
-     style="width: 100%; height: 160px; object-fit: cover; border-radius: 8px 8px 0 0;">
+          <div th:if="${k.foto != null and !#strings.isEmpty(k.foto)}">
+            <img th:src="@{/uploads/kendaraan/{foto}(foto=${k.foto})}"
+                 alt="Foto Kendaraan"
+                 style="width: 100%; height: 160px; object-fit: cover; border-radius: 8px 8px 0 0;">
           </div>
           <div th:unless="${k.foto != null and !#strings.isEmpty(k.foto)}"
                class="v-thumb-emoji"
@@ -140,7 +136,7 @@
           <div class="d-flex justify-content-between align-items-start">
             <div>
               <div class="v-brand" th:text="${k.merk}">Merk</div>
-              <div class="v-model" th:text="${#strings.substring(k.tahun, 0, 4)} + ' · ' + ${k.model}">Tahun · Model</div>
+              <div class="v-model" th:text="${k.tahun} + ' · ' + ${k.model}">Tahun · Model</div>
             </div>
             <span th:class="'b-status b-' + ${#strings.toLowerCase(#strings.replace(k.status, ' ', ''))}"
                   th:text="${k.status}">Status</span>
@@ -149,21 +145,22 @@
           <div class="v-price" th:text="'Rp ' + ${#numbers.formatDecimal(k.harga, 0, 'COMMA', 0, 'POINT')}">Harga</div>
 
           <div style="font-size:11px;color:var(--muted);margin-top:4px">
-             <span th:if="${k.jenis == 'mobil'}">
-                <i class="bi bi-gear me-1"></i> Transmisi: <span th:text="${k.transmisi_mobil}"></span>
-             </span>
-             <span th:if="${k.jenis == 'motor'}">
-                <i class="bi bi-gear me-1"></i> Kapasitas: <span th:text="${k.cc} + ' cc'"></span>
-             </span>
+            <span th:if="${k.jenis == 'mobil'}">
+              <i class="bi bi-gear me-1"></i> Transmisi: <span th:text="${k.transmisi_mobil}"></span>
+            </span>
+            <span th:if="${k.jenis == 'motor'}">
+              <i class="bi bi-gear me-1"></i> Kapasitas: <span th:text="${k.cc} + ' cc'"></span>
+            </span>
           </div>
 
           <div class="d-flex gap-2 mt-3">
             <button class="btn-og flex-fill" style="font-size:11px;padding:5px 8px;">Detail</button>
-            <a th:href="@{/kendaraan/hapus/{id}(id=${k.id_kendaraan})}"
-                class="btn-red flex-fill"
-                style="font-size:11px; padding:5px 8px; text-decoration:none; text-align:center;"
-                onclick="return confirm('Apakah Anda yakin ingin menghapus kendaraan ini?');">
-                Hapus
+            <!-- ✅ FIX: path hapus pakai /admin/ -->
+            <a th:href="@{/admin/kendaraan/hapus/{id}(id=${k.id_kendaraan})}"
+               class="btn-red flex-fill"
+               style="font-size:11px; padding:5px 8px; text-decoration:none; text-align:center;"
+               onclick="return confirm('Apakah Anda yakin ingin menghapus kendaraan ini?');">
+              Hapus
             </a>
           </div>
         </div>
@@ -171,7 +168,7 @@
 
     </div>
 
-    <div class="pg-footer mt-4">AUTOPRIME SHOWROOM MANAGEMENT &nbsp;·&nbsp; © 2025</div>
+    <div class="pg-footer mt-4">AUTOPRIME SHOWROOM MANAGEMENT &nbsp;·&nbsp; © 2026</div>
   </div>
 </div>
 
@@ -180,8 +177,8 @@
   <div class="modal-box">
     <div class="modal-title">Tambah Kendaraan</div>
 
-    <!-- enctype wajib untuk upload file -->
-    <form action="/kendaraan/tambah" method="POST" enctype="multipart/form-data">
+    <!-- ✅ FIX: th:action dengan path /admin/ yang benar -->
+    <form th:action="@{/admin/kendaraan/tambah}" method="POST" enctype="multipart/form-data">
       <div class="row g-3">
         <div class="col-6">
           <label class="lbl">Jenis</label>
@@ -223,7 +220,6 @@
         <div class="col-12">
           <label class="lbl">Foto Kendaraan <span style="color:var(--muted);font-weight:400;">(opsional)</span></label>
 
-          <!-- Preview muncul setelah user pilih file -->
           <div id="fotoPreviewWrap">
             <img id="fotoPreview" src="" alt="Preview Foto"/>
             <button type="button" id="hapusFotoBtn" title="Hapus foto">
@@ -231,7 +227,6 @@
             </button>
           </div>
 
-          <!-- Area drag & drop / klik -->
           <div class="upload-area" id="uploadArea">
             <input type="file" name="foto" id="fotoInput" accept="image/*"/>
             <div class="upload-icon"><i class="bi bi-image"></i></div>
@@ -259,9 +254,9 @@
   renderSidebar('kendaraan.html');
 
   // ── Filter & Search ──────────────────────────────────────────────
-  const searchInput    = document.getElementById('searchInput');
-  const filterButtons  = document.querySelectorAll('.pill-tab');
-  const vehicleCards   = document.querySelectorAll('#kendaraanGrid > div');
+  const searchInput   = document.getElementById('searchInput');
+  const filterButtons = document.querySelectorAll('.pill-tab');
+  const vehicleCards  = document.querySelectorAll('#kendaraanGrid > div');
   let currentFilter = 'semua';
   let currentSearch = '';
 
@@ -302,18 +297,17 @@
     if (e.target === e.currentTarget) closeModal();
   });
 
-  // ── Upload Foto Preview ─────────────────────────────────────────
-  const fotoInput      = document.getElementById('fotoInput');
-  const fotoPreview    = document.getElementById('fotoPreview');
-  const previewWrap    = document.getElementById('fotoPreviewWrap');
-  const uploadArea     = document.getElementById('uploadArea');
-  const hapusFotoBtn   = document.getElementById('hapusFotoBtn');
+  // ── Upload Foto Preview ──────────────────────────────────────────
+  const fotoInput    = document.getElementById('fotoInput');
+  const fotoPreview  = document.getElementById('fotoPreview');
+  const previewWrap  = document.getElementById('fotoPreviewWrap');
+  const uploadArea   = document.getElementById('uploadArea');
+  const hapusFotoBtn = document.getElementById('hapusFotoBtn');
 
   fotoInput.addEventListener('change', function() {
     const file = this.files[0];
     if (!file) return;
 
-    // Validasi ukuran (maks 5 MB)
     if (file.size > 5 * 1024 * 1024) {
       alert('Ukuran foto terlalu besar. Maksimal 5 MB.');
       this.value = '';
@@ -329,17 +323,16 @@
     reader.readAsDataURL(file);
   });
 
-  // Tombol hapus / ganti foto
   hapusFotoBtn.addEventListener('click', resetFotoUpload);
 
   function resetFotoUpload() {
-    fotoInput.value   = '';
-    fotoPreview.src   = '';
+    fotoInput.value = '';
+    fotoPreview.src = '';
     previewWrap.style.display = 'none';
     uploadArea.style.display  = 'block';
   }
 
-  // Drag & drop visual feedback
+  // Drag & drop
   uploadArea.addEventListener('dragover',  e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
   uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
   uploadArea.addEventListener('drop', e => {
@@ -347,7 +340,6 @@
     uploadArea.classList.remove('drag-over');
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith('image/')) {
-      // Inject file ke input agar ikut ter-submit
       const dt = new DataTransfer();
       dt.items.add(file);
       fotoInput.files = dt.files;
@@ -357,4 +349,3 @@
 </script>
 </body>
 </html>
-  

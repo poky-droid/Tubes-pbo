@@ -13,15 +13,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
-public class pembeliController {
+public class pembeliController extends BaseController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @GetMapping("/admin/pembeli")
-    public String showPembeli(Model model) {
+    public String showPembeli(Model model, HttpSession session) {
+        if (!isOwner(session)) return "redirect:/login?accessDenied=true";
+
         try {
             // --- 1. LOGIKA KARTU STATISTIK PEMBELI ---
             Integer totalPembeli = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM pembeli", Integer.class);
@@ -72,11 +75,13 @@ public class pembeliController {
     // --- 3. LOGIKA TAMBAH PEMBELI BARU ---
     @PostMapping("/admin/pembeli/tambah")
     public String tambahPembeli(
+                HttpSession session,
             @RequestParam("nama") String nama,
             @RequestParam("username") String username,
             @RequestParam("email") String email,
             @RequestParam("kontak") String kontak,
             @RequestParam("password") String password) {
+            if (!isOwner(session)) return "redirect:/login?accessDenied=true";
         
         try {
             // 1. Simpan ke tabel user (menggunakan backtick)
@@ -107,7 +112,13 @@ public class pembeliController {
     // --- 4. LOGIKA AMBIL DETAIL PEMBELI (AJAX) ---
     @GetMapping("/admin/pembeli/detail/{id}")
     @ResponseBody
-    public Map<String, Object> getDetailPembeli(@PathVariable("id") Integer idPembeli) {
+    public Map<String, Object> getDetailPembeli(@PathVariable("id") Integer idPembeli, HttpSession session) {
+         if (!isOwner(session)) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Access Denied");
+            return response;
+        }
         Map<String, Object> response = new HashMap<>();
 
         try {
