@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -32,10 +34,42 @@ public class kendaraanController {
 
     private static final String UPLOAD_DIR = System.getProperty("user.dir") + File.separator + "uploads" + File.separator + "kendaraan" + File.separator;
 
+
+    @GetMapping("/buyer/kendaraan/{id}")
+    public String detailKendaraan(@PathVariable Long id, Model model) {
+        String sql = "SELECT k.*, " +
+                     "m.transmisi_mobil, m.mesin_mobil, " +
+                     "mo.cc, " +
+                     "CASE WHEN m.id_kendaraan IS NOT NULL THEN 'mobil' " +
+                     "     WHEN mo.id_kendaraan IS NOT NULL THEN 'motor' " +
+                     "END as jenis " +
+                     "FROM kendaraan k " +
+                     "LEFT JOIN mobil m ON k.id_kendaraan = m.id_kendaraan " +
+                     "LEFT JOIN motor mo ON k.id_kendaraan = mo.id_kendaraan " +
+                     "WHERE k.id_kendaraan = ?";
+
+        List<Map<String, Object>> kendaraanList = jdbcTemplate.queryForList(sql, id);
+
+        if (kendaraanList.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Kendaraan tidak ditemukan");
+        }
+
+        Map<String, Object> kendaraan = kendaraanList.get(0);
+        model.addAttribute("kendaraan", kendaraan);
+        return "buyer-kendaraan-detail";  // resources/templates/buyer/kendaraan-detail.html
+        
+    }
+
     public boolean isOwner(HttpSession session) {
         String role = (String) session.getAttribute("role");
         return role != null && role.equalsIgnoreCase("owner");
     }
+
+    @GetMapping("path")
+    public String getMethodName(@RequestParam String param) {
+        return new String();
+    }
+    
 
     @GetMapping("/admin/kendaraan")
     public String showKendaraan(Model model, HttpSession session) {  // tambah HttpSession di sini
