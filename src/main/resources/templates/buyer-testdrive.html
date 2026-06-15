@@ -12,12 +12,12 @@
 <!-- DESKTOP NAV -->
 <nav class="ap-nav">
     <div class="nav-inner">
-        <a href="/buyer/home" class="nav-logo">Artomoro Showroom</a>
+        <a href="/" class="nav-logo">Artomoro Showroom</a>
         <div class="nav-links">
-            <a href="/buyer/home">     <i class="bi bi-grid-3x3-gap-fill"></i> Katalog</a>
+            <a href="/">                               <i class="bi bi-grid-3x3-gap-fill"></i> Katalog</a>
             <a href="/buyer/testdrive" class="nav-active"><i class="bi bi-calendar-check"></i> Test Drive</a>
-            <a href="/buyer/pesanan">  <i class="bi bi-bag-check"></i> Pesanan</a>
-            <a href="/buyer/profil">   <i class="bi bi-person-circle"></i> Profil</a>
+            <a href="/buyer/pesanan">                  <i class="bi bi-bag-check"></i> Pesanan</a>
+            <a href="/buyer/profil">                   <i class="bi bi-person-circle"></i> Profil</a>
         </div>
         <div class="nav-right">
             <span class="nav-user" th:text="${nama}">Pengguna</span>
@@ -28,7 +28,7 @@
 
 <!-- MOBILE BAR -->
 <div class="mob-bar">
-    <a href="/buyer/home" class="mob-logo">Artomoro Showroom</a>
+    <a href="/" class="mob-logo">Artomoro Showroom</a>
     <button class="mob-btn" onclick="openDrawer()"><i class="bi bi-list"></i></button>
 </div>
 <div class="mob-overlay" id="mobOverlay" onclick="closeDrawer()"></div>
@@ -38,11 +38,11 @@
         <button class="drawer-close" onclick="closeDrawer()"><i class="bi bi-x"></i></button>
     </div>
     <div class="drawer-nav">
-        <a href="/buyer/home">     <i class="bi bi-grid-3x3-gap-fill"></i> Katalog</a>
+        <a href="/">                               <i class="bi bi-grid-3x3-gap-fill"></i> Katalog</a>
         <a href="/buyer/testdrive" class="nav-active"><i class="bi bi-calendar-check"></i> Test Drive</a>
-        <a href="/buyer/pesanan">  <i class="bi bi-bag-check"></i> Pesanan</a>
-        <a href="/buyer/profil">   <i class="bi bi-person-circle"></i> Profil</a>
-        <a href="/logout" class="nav-logout"><i class="bi bi-box-arrow-right"></i> Keluar</a>
+        <a href="/buyer/pesanan">                  <i class="bi bi-bag-check"></i> Pesanan</a>
+        <a href="/buyer/profil">                   <i class="bi bi-person-circle"></i> Profil</a>
+        <a href="/logout" class="nav-logout">      <i class="bi bi-box-arrow-right"></i> Keluar</a>
     </div>
     <div class="drawer-foot" th:text="'Halo, ' + ${nama}">Halo, Pengguna</div>
 </div>
@@ -147,21 +147,25 @@
                         <div class="tl-box">
                             <div class="tl-top">
                                 <div class="tl-name"
-                                     th:text="${kendaraanMap[td.idKendaraan] != null ?
-                                         kendaraanMap[td.idKendaraan].merk + ' ' + kendaraanMap[td.idKendaraan].model :
-                                         'Kendaraan #' + td.idKendaraan}">Kendaraan</div>
-                                <span class="ap-badge" th:classappend="'badge-' + ${td.status}" th:text="${td.status}">menunggu</span>
+                                     th:text="${kendaraanMap[td['id_kendaraan']] != null ?
+                                         kendaraanMap[td['id_kendaraan']].merk + ' ' + kendaraanMap[td['id_kendaraan']].model :
+                                         'Kendaraan #' + td['id_kendaraan']}">Kendaraan</div>
+                                <span class="ap-badge"
+                                      th:classappend="'badge-' + ${td['status']}"
+                                      th:text="${td['status']}">menunggu</span>
                             </div>
                             <div class="tl-meta">
                                 <i class="bi bi-calendar3"></i>
-                                <span th:text="${#temporals.format(td.tanggal,'dd MMMM yyyy')}"></span>
+                                <span th:text="${td['tanggal_str']}"></span>
                                 &nbsp;&bull;&nbsp;
                                 <i class="bi bi-clock"></i>
-                                <span th:text="${#temporals.format(td.jam,'HH:mm') + ' WIB'}"></span>
+                                <span th:text="${td['jam_str'] + ' WIB'}"></span>
                             </div>
-                            <div class="tl-meta" th:if="${td.catatan != null and !#strings.isEmpty(td.catatan)}" style="font-style:italic;margin-top:.2rem">
+                            <div class="tl-meta"
+                                 th:if="${td['catatan'] != null and !#strings.isEmpty(td['catatan'])}"
+                                 style="font-style:italic;margin-top:.2rem">
                                 <i class="bi bi-chat-text"></i>
-                                <span th:text="${td.catatan}"></span>
+                                <span th:text="${td['catatan']}"></span>
                             </div>
                         </div>
                     </li>
@@ -181,8 +185,14 @@
 <span th:if="${error}"   id="flashError"   th:attr="data-msg=${error}"   style="display:none"></span>
 
 <script>
-function openDrawer()  { document.getElementById('mobDrawer').classList.add('is-open'); document.getElementById('mobOverlay').classList.add('is-open'); }
-function closeDrawer() { document.getElementById('mobDrawer').classList.remove('is-open'); document.getElementById('mobOverlay').classList.remove('is-open'); }
+function openDrawer()  {
+    document.getElementById('mobDrawer').classList.add('is-open');
+    document.getElementById('mobOverlay').classList.add('is-open');
+}
+function closeDrawer() {
+    document.getElementById('mobDrawer').classList.remove('is-open');
+    document.getElementById('mobOverlay').classList.remove('is-open');
+}
 
 const d = new Date().toISOString().split('T')[0];
 const dateEl = document.getElementById('tdDate');
@@ -192,12 +202,17 @@ function showToast(type, msg) {
     const wrap = document.getElementById('toastWrap');
     const div  = document.createElement('div');
     div.className = 'toast-card ' + type;
-    div.innerHTML = `<div class="t-icon"><i class="bi bi-${type==='success'?'check-lg':'exclamation-lg'}"></i></div>
-        <div class="t-body"><div class="t-title">${type==='success'?'Berhasil!':'Gagal'}</div><div class="t-msg">${msg}</div></div>
+    div.innerHTML = `
+        <div class="t-icon"><i class="bi bi-${type === 'success' ? 'check-lg' : 'exclamation-lg'}"></i></div>
+        <div class="t-body">
+            <div class="t-title">${type === 'success' ? 'Berhasil!' : 'Gagal'}</div>
+            <div class="t-msg">${msg}</div>
+        </div>
         <button class="t-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>`;
     wrap.appendChild(div);
     setTimeout(() => div.remove(), 5000);
 }
+
 const fs = document.getElementById('flashSuccess');
 const fe = document.getElementById('flashError');
 if (fs) showToast('success', fs.dataset.msg);

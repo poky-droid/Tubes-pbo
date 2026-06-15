@@ -95,34 +95,53 @@
         </div>
     </div>
 
-    <div class="vehicle-grid" id="vehicleGrid">
-        <th:block th:each="k : ${kendaraan}">
-            <div class="v-item" th:attr="data-merk=${k.merk},data-model=${k.model},data-status=${k.status},data-tahun=${k.tahun}">
-                <div class="vcard">
-                    <div class="vcard-thumb">
-                        <i class="bi bi-car-front-fill vcard-thumb-icon"></i>
-                        <div class="vcard-badge">
-                            <span class="ap-badge" th:classappend="'badge-' + ${k.status}" th:text="${k.status}">tersedia</span>
-                        </div>
+   <div class="vehicle-grid" id="vehicleGrid">
+    <th:block th:each="k : ${kendaraan}">
+        <div class="v-item" th:attr="data-merk=${k.merk},data-model=${k.model},data-status=${k.status},data-tahun=${k.tahun}">
+            <div class="vcard">
+                <div class="vcard-thumb">
+
+                    <!-- Tampilkan foto jika ada, fallback ke icon -->
+                    <img th:if="${k.foto != null and !#strings.isEmpty(k.foto)}"
+                    th:src="@{/uploads/kendaraan/{foto}(foto=${k.foto})}"
+                    alt="Foto Kendaraan"
+                    class="vcard-thumb-img">
+                    <i th:unless="${k.foto != null and !#strings.isEmpty(k.foto)}"
+                       class="bi bi-car-front-fill vcard-thumb-icon"></i>
+
+                    <div class="vcard-badge">
+                        <span class="ap-badge"
+                              th:classappend="'badge-' + ${k.status}"
+                              th:text="${k.status}">tersedia</span>
                     </div>
-                    <div class="vcard-body">
-                        <div class="vcard-name" th:text="${k.merk + ' ' + k.model}">Honda Beat</div>
-                        <div class="vcard-year"><i class="bi bi-calendar3"></i><span th:text="'Tahun ' + ${k.tahun}">Tahun 2023</span></div>
-                        <div class="vcard-price">
-                            <span class="price-prefix">Rp </span><th:block th:text="${#numbers.formatDecimal(k.harga,1,'COMMA',0,'POINT')}">25.000.000</th:block>
-                        </div>
-                        <div class="vcard-actions">
-                            <a th:href="@{/buyer/testdrive(kendaraan=${k.idKendaraan})}" class="ap-btn dark wide" th:if="${k.status == 'tersedia'}">
-                                <i class="bi bi-calendar-plus"></i> Jadwalkan Test Drive
-                            </a>
-                            <button class="ap-btn disabled wide" th:if="${k.status != 'tersedia'}" disabled>
-                                <i class="bi bi-x-circle"></i> Tidak Tersedia
-                            </button>
-                        </div>
+                </div>
+                <div class="vcard-body">
+                    <div class="vcard-name" th:text="${k.merk + ' ' + k.model}">Honda Beat</div>
+                    <div class="vcard-year">
+                        <i class="bi bi-calendar3"></i>
+                        <span th:text="'Tahun ' + ${k.tahun}">Tahun 2023</span>
+                    </div>
+                    <div class="vcard-price">
+                        <span class="price-prefix">Rp </span>
+                        <th:block th:text="${#numbers.formatDecimal(k.harga, 1, 'COMMA', 0, 'POINT')}">25.000.000</th:block>
+                    </div>
+                    <div class="vcard-actions">
+                        <a th:href="@{/buyer/testdrive(kendaraan=${k.idKendaraan})}"
+                           class="ap-btn dark wide"
+                           th:if="${k.status == 'tersedia'}">
+                            <i class="bi bi-calendar-plus"></i> Jadwalkan Test Drive
+                        </a>
+                        <button class="ap-btn disabled wide"
+                                th:unless="${k.status == 'tersedia'}"
+                                disabled>
+                            <i class="bi bi-x-circle"></i> Tidak Tersedia
+                        </button>
                     </div>
                 </div>
             </div>
-        </th:block>
+        </div>
+    </th:block>
+</div>
 
 
 

@@ -28,22 +28,14 @@ public class userController extends user  {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    // ── Halaman utama (katalog, bebas akses) ──────────────────────────────
-    @RequestMapping(method = RequestMethod.GET, value = "/")
-    public String home(Model model, HttpSession session) {
-        // Jika sudah login, langsung ke buyer home
-        if (session.getAttribute("id_pembeli") != null) {
-            return "redirect:/buyer/home";
-        }
-        return "index";
-    }
+   
 
     // ── Halaman Login ─────────────────────────────────────────────────────
     @RequestMapping(method = RequestMethod.GET, value = "/login")
     public String loginPage(HttpSession session) {
         // Jika sudah login, tidak perlu ke halaman login
         if (session.getAttribute("id_pembeli") != null) {
-            return "redirect:/buyer/home";
+            return "redirect:/";
         }
         return "login";
     }
@@ -85,14 +77,14 @@ public class userController extends user  {
                 } catch (EmptyResultDataAccessException e) {
                     session.setAttribute("id_pembeli", null);
                 }
-                return "redirect:/buyer/home";
+                return "redirect:/";
             }
 
             if (role.equalsIgnoreCase("owner") || role.equalsIgnoreCase("admin")) {
                 return "redirect:/admin/Dashboard";
             }
 
-            return "redirect:/buyer/home";
+            return "redirect:/";
 
         } catch (EmptyResultDataAccessException e) {
             model.addAttribute("loginError", "Username atau password salah.");
@@ -104,15 +96,19 @@ public class userController extends user  {
     }
 
     // ── Halaman Buyer Home ────────────────────────────────────────────────
-    @RequestMapping(method = RequestMethod.GET, value = "/buyer/home")
-    public String buyerHome(Model model, HttpSession session) {
+    @RequestMapping(method = RequestMethod.GET, value = "/")
+    public String home(Model model, HttpSession session) {
 
-        if (session.getAttribute("id_pembeli") == null) {
-            return "redirect:/login?sessionExpired=true";
-        }
+
+        // Jika sudah login, redirect ke halaman buyer
+        
+
+        // Belum login, tetap tampilkan halaman utama dengan data kendaraan
+        model.addAttribute("isLoggedIn", false);
+        model.addAttribute("nama", null);
 
         String sql = """
-            SELECT id_kendaraan, merk, model, tahun, harga, status
+            SELECT id_kendaraan, merk, model, tahun, harga, foto, status
             FROM kendaraan
             ORDER BY id_kendaraan DESC
         """;
@@ -122,20 +118,20 @@ public class userController extends user  {
             daftarKendaraan = jdbcTemplate.query(
                 sql,
                 (rs, rowNum) -> new kendaraan(
-                rs.getLong("id_kendaraan"),  // getLong bukan getInt
-                rs.getString("merk"),
-                rs.getString("model"),
-                rs.getInt("tahun"),
-                rs.getDouble("harga"),
-                rs.getString("status")
-            )
+                    rs.getLong("id_kendaraan"),
+                    rs.getString("merk"),
+                    rs.getString("model"),
+                    rs.getInt("tahun"),
+                    rs.getDouble("harga"),
+                    rs.getString("status"),
+                    rs.getString("foto")
+                )
             );
         } catch (Exception e) {
             System.out.println("Error query: " + e.getMessage());
         }
 
         System.out.println("Jumlah kendaraan = " + daftarKendaraan.size());
-        model.addAttribute("nama", session.getAttribute("nama"));
         model.addAttribute("kendaraan", daftarKendaraan);
 
         return "index";
@@ -150,18 +146,34 @@ public class userController extends user  {
         try {
             model.addAttribute("nama", session.getAttribute("nama"));
 
+            // List kendaraan untuk dropdown form
+            String sqlKendaraan = "SELECT id_kendaraan, merk, model, tahun, harga, foto, status FROM kendaraan WHERE status = 'tersedia'";
+            List<kendaraan> kendaraanList = jdbcTemplate.query(
+                sqlKendaraan,
+                (rs, rowNum) -> new kendaraan(
+                    rs.getLong("id_kendaraan"),
+                    rs.getString("merk"),
+                    rs.getString("model"),
+                    rs.getInt("tahun"),
+                    rs.getDouble("harga"),
+                    rs.getString("status"),
+                    rs.getString("foto")
+                )
+            );
+            model.addAttribute("kendaraanList", kendaraanList);
+
+            // History testdrive milik pembeli
             String sqlTestdrive =
-                "SELECT td.id_testdrive, td.id_kendaraan, td.tanggal, td.status " +
+                "SELECT td.id_testdrive, td.id_kendaraan, td.tanggal, td.jam, td.status, td.catatan " +
                 "FROM testdrive td " +
                 "WHERE td.id_pembeli = ? ORDER BY td.tanggal DESC";
-            List<Map<String, Object>> myTestdrives = jdbcTemplate.queryForList(sqlTestdrive, idPembeli);
-            model.addAttribute("myTestdrives", myTestdrives);
+            List<Map<String, Object>> testdriveList = jdbcTemplate.queryForList(sqlTestdrive, idPembeli);
+            model.addAttribute("testdriveList", testdriveList);
 
-            String sqlKendaraan = "SELECT id_kendaraan, merk, model FROM kendaraan";
-            List<Map<String, Object>> kendaraanList = jdbcTemplate.queryForList(sqlKendaraan);
-            Map<Integer, Map<String, Object>> kendaraanMap = new HashMap<>();
-            for (Map<String, Object> k : kendaraanList) {
-                kendaraanMap.put((Integer) k.get("id_kendaraan"), k);
+            // Map kendaraan untuk lookup di history (key = Long)
+            Map<Long, kendaraan> kendaraanMap = new HashMap<>();
+            for (kendaraan k : kendaraanList) {
+                kendaraanMap.put(k.getIdKendaraan(), k);
             }
             model.addAttribute("kendaraanMap", kendaraanMap);
 
@@ -171,7 +183,8 @@ public class userController extends user  {
             System.err.println("Error memuat halaman testdrive: " + e.getMessage());
             e.printStackTrace();
             model.addAttribute("error", "Terjadi kesalahan memuat data test drive");
-            model.addAttribute("myTestdrives", new java.util.ArrayList<>());
+            model.addAttribute("testdriveList", new java.util.ArrayList<>());
+            model.addAttribute("kendaraanList", new java.util.ArrayList<>());
             model.addAttribute("kendaraanMap", new HashMap<>());
             return "buyer-testdrive";
         }
@@ -180,39 +193,49 @@ public class userController extends user  {
     // ── Halaman Pesanan Pembeli ───────────────────────────────────────────
     @GetMapping("/buyer/pesanan")
     public String buyerPesanan(Model model, HttpSession session) {
-        Integer idPembeli = (Integer) session.getAttribute("id_pembeli");
-        if (idPembeli == null) return "redirect:/login?sessionExpired=true";
+    Integer idPembeli = (Integer) session.getAttribute("id_pembeli");
+    if (idPembeli == null) return "redirect:/login?sessionExpired=true";
 
-        try {
-            model.addAttribute("nama", session.getAttribute("nama"));
+    try {
+        model.addAttribute("nama", session.getAttribute("nama"));
 
-            String sqlPesanan =
-                "SELECT p.id_penjualan, p.id_kendaraan, p.total_harga, " +
-                "p.tanggal, p.status FROM penjualan p " +
-                "WHERE p.id_pembeli = ? ORDER BY p.tanggal DESC";
-            List<Map<String, Object>> pesanan = jdbcTemplate.queryForList(sqlPesanan, idPembeli);
-            model.addAttribute("pesanan", pesanan);
+        String sqlPesanan =
+            "SELECT p.id_penjualan, p.id_kendaraan, p.total_harga, " +
+            "p.tanggal, p.status FROM penjualan p " +
+            "WHERE p.id_pembeli = ? ORDER BY p.tanggal DESC";
+        List<Map<String, Object>> pesanan = jdbcTemplate.queryForList(sqlPesanan, idPembeli);
 
-            String sqlKendaraan = "SELECT id_kendaraan, merk, model, harga FROM kendaraan";
-            List<Map<String, Object>> kendaraanList = jdbcTemplate.queryForList(sqlKendaraan);
-            Map<Integer, Map<String, Object>> kendaraanMap = new HashMap<>();
-            for (Map<String, Object> k : kendaraanList) {
-                kendaraanMap.put((Integer) k.get("id_kendaraan"), k);
+        // Format tanggal sebelum masuk model
+        for (Map<String, Object> p : pesanan) {
+            if (p.get("tanggal") instanceof java.sql.Date) {
+                java.sql.Date tgl = (java.sql.Date) p.get("tanggal");
+                p.put("tanggal_str", tgl.toLocalDate()
+                    .format(java.time.format.DateTimeFormatter
+                        .ofPattern("dd MMMM yyyy", new java.util.Locale("id", "ID"))));
             }
-            model.addAttribute("kendaraanMap", kendaraanMap);
-
-            return "buyer-pesanan";
-
-        } catch (Exception e) {
-            System.err.println("Error memuat halaman pesanan: " + e.getMessage());
-            e.printStackTrace();
-            model.addAttribute("error", "Terjadi kesalahan memuat data pesanan");
-            model.addAttribute("pesanan", new java.util.ArrayList<>());
-            model.addAttribute("kendaraanMap", new HashMap<>());
-            return "buyer-pesanan";
         }
-    }
+        model.addAttribute("pesanan", pesanan);
 
+        // Fix: key pakai Long bukan Integer
+        String sqlKendaraan = "SELECT id_kendaraan, merk, model, harga FROM kendaraan";
+        List<Map<String, Object>> kendaraanList = jdbcTemplate.queryForList(sqlKendaraan);
+        Map<Long, Map<String, Object>> kendaraanMap = new HashMap<>();
+        for (Map<String, Object> k : kendaraanList) {
+            kendaraanMap.put((Long) k.get("id_kendaraan"), k);
+        }
+        model.addAttribute("kendaraanMap", kendaraanMap);
+
+        return "buyer-pesanan";
+
+    } catch (Exception e) {
+        System.err.println("Error memuat halaman pesanan: " + e.getMessage());
+        e.printStackTrace();
+        model.addAttribute("error", "Terjadi kesalahan memuat data pesanan");
+        model.addAttribute("pesanan", new java.util.ArrayList<>());
+        model.addAttribute("kendaraanMap", new HashMap<>());
+        return "buyer-pesanan";
+    }
+}
     // ── Halaman Profil Pembeli ────────────────────────────────────────────
     @GetMapping("/buyer/profil")
     public String buyerProfil(Model model, HttpSession session) {
