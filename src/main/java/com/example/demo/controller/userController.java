@@ -108,24 +108,33 @@ public class userController extends user  {
         model.addAttribute("nama", null);
 
         String sql = """
-            SELECT id_kendaraan, merk, model, tahun, harga, foto, status
-            FROM kendaraan
-            ORDER BY id_kendaraan DESC
+            SELECT k.id_kendaraan, k.merk, k.model, k.tahun, k.harga, k.foto, k.status,
+                   CASE WHEN m.id_kendaraan IS NOT NULL THEN 'mobil'
+                        WHEN mo.id_kendaraan IS NOT NULL THEN 'motor' ELSE '' END as jenis
+            FROM kendaraan k
+            LEFT JOIN mobil m ON k.id_kendaraan = m.id_kendaraan
+            LEFT JOIN motor mo ON k.id_kendaraan = mo.id_kendaraan
+            WHERE k.status = 'tersedia'
+            ORDER BY k.id_kendaraan DESC
         """;
 
         List<kendaraan> daftarKendaraan = new ArrayList<>();
         try {
             daftarKendaraan = jdbcTemplate.query(
                 sql,
-                (rs, rowNum) -> new kendaraan(
-                    rs.getLong("id_kendaraan"),
-                    rs.getString("merk"),
-                    rs.getString("model"),
-                    rs.getInt("tahun"),
-                    rs.getDouble("harga"),
-                    rs.getString("status"),
-                    rs.getString("foto")
-                )
+                (rs, rowNum) -> {
+                    kendaraan kk = new kendaraan(
+                        rs.getLong("id_kendaraan"),
+                        rs.getString("merk"),
+                        rs.getString("model"),
+                        rs.getInt("tahun"),
+                        rs.getDouble("harga"),
+                        rs.getString("status"),
+                        rs.getString("foto")
+                    );
+                    try { kk.setJenisKendaraan(rs.getString("jenis") != null ? rs.getString("jenis") : ""); } catch(Exception ex) { kk.setJenisKendaraan(""); }
+                    return kk;
+                }
             );
         } catch (Exception e) {
             System.out.println("Error query: " + e.getMessage());

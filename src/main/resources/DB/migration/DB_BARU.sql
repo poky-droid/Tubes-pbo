@@ -349,6 +349,8 @@ ALTER TABLE `penjualan`
 --
 -- Constraints for table `testdrive`
 --
+
+ALTER TABLE kendaraan ADD COLUMN warna VARCHAR(50) NULL;
 ALTER TABLE `testdrive`
   ADD CONSTRAINT `fk_testdrive_kendaraan` FOREIGN KEY (`id_kendaraan`) REFERENCES `kendaraan` (`id_kendaraan`),
   ADD CONSTRAINT `fk_testdrive_owner` FOREIGN KEY (`id_owner`) REFERENCES `owner` (`id_owner`),

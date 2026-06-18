@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -37,27 +38,44 @@ public class kendaraanController {
 
     @GetMapping("/buyer/kendaraan/{id}")
     public String detailKendaraan(@PathVariable Long id, Model model) {
-        String sql = "SELECT k.*, " +
-                     "m.transmisi_mobil, m.mesin_mobil, " +
-                     "mo.cc, " +
-                     "CASE WHEN m.id_kendaraan IS NOT NULL THEN 'mobil' " +
-                     "     WHEN mo.id_kendaraan IS NOT NULL THEN 'motor' " +
-                     "END as jenis " +
-                     "FROM kendaraan k " +
-                     "LEFT JOIN mobil m ON k.id_kendaraan = m.id_kendaraan " +
-                     "LEFT JOIN motor mo ON k.id_kendaraan = mo.id_kendaraan " +
-                     "WHERE k.id_kendaraan = ?";
 
-        List<Map<String, Object>> kendaraanList = jdbcTemplate.queryForList(sql, id);
+        String sql = """
+            SELECT
+                k.*,
 
-        if (kendaraanList.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Kendaraan tidak ditemukan");
+                m.mesin_mobil,
+                m.jenis_mobil,
+                m.transmisi_mobil,
+                m.kapasitas_mobil,
+
+                mo.cc,
+                mo.jenis_motor,
+                mo.kapasitas_tangki,
+
+                CASE
+                    WHEN m.id_kendaraan IS NOT NULL THEN 'mobil'
+                    WHEN mo.id_kendaraan IS NOT NULL THEN 'motor'
+                END AS jenis
+
+            FROM kendaraan k
+            LEFT JOIN mobil m
+                ON k.id_kendaraan = m.id_kendaraan
+            LEFT JOIN motor mo
+                ON k.id_kendaraan = mo.id_kendaraan
+            WHERE k.id_kendaraan = ?
+            """;
+
+        List<Map<String, Object>> data = jdbcTemplate.queryForList(sql, id);
+
+        if (data.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Kendaraan tidak ditemukan");
         }
 
-        Map<String, Object> kendaraan = kendaraanList.get(0);
-        model.addAttribute("kendaraan", kendaraan);
-        return "buyer-kendaraan-detail";  // resources/templates/buyer/kendaraan-detail.html
-        
+        model.addAttribute("kendaraan", data.get(0));
+
+        return "buyer-kendaraan-detail";
     }
 
     public boolean isOwner(HttpSession session) {
@@ -65,10 +83,7 @@ public class kendaraanController {
         return role != null && role.equalsIgnoreCase("owner");
     }
 
-    @GetMapping("path")
-    public String getMethodName(@RequestParam String param) {
-        return new String();
-    }
+   
     
 
     @GetMapping("/admin/kendaraan")
@@ -120,13 +135,37 @@ public class kendaraanController {
             @RequestParam("harga") double harga,
             @RequestParam("status") String status,
             @RequestParam(value = "warna", required = false) String warna,
+            @RequestParam(value = "mesinMobil", required = false) String mesinMobil,
+            @RequestParam(value = "jenisMobil", required = false) String jenisMobil,
+            @RequestParam(value = "transmisiMobil", required = false) String transmisi,
+            @RequestParam(value = "kapasitasMobil", required = false) Integer kapasitasMobil,
+            @RequestParam(value = "cc", required = false) Integer cc,
+            @RequestParam(value = "jenisMotor", required = false) String jenisMotor,
+            @RequestParam(value = "kapasitasTangki", required = false) Double kapasitasTangki,
             @RequestParam(value = "foto", required = false) MultipartFile foto,
-            HttpSession session
+            HttpSession session,
+            RedirectAttributes redirectAttributes
     ) {
         if (!isOwner(session)) return "redirect:/login?accessDenied=true";
 
+        // Validasi dulu sebelum insert apapun, supaya tidak ada row "yatim" di tabel kendaraan
+        if (!jenisKendaraan.equalsIgnoreCase("Mobil") && !jenisKendaraan.equalsIgnoreCase("Motor")) {
+            redirectAttributes.addFlashAttribute("error", "Jenis kendaraan tidak valid.");
+            return "redirect:/admin/kendaraan";
+        }
+
+        // ── Upload foto, sekarang divalidasi juga di server (bukan cuma percaya accept="image/*" di HTML) ──
         String namaFile = null;
         if (foto != null && !foto.isEmpty()) {
+            String contentType = foto.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                redirectAttributes.addFlashAttribute("error", "File harus berupa gambar.");
+                return "redirect:/admin/kendaraan";
+            }
+            if (foto.getSize() > 5 * 1024 * 1024) {
+                redirectAttributes.addFlashAttribute("error", "Ukuran foto maksimal 5MB.");
+                return "redirect:/admin/kendaraan";
+            }
             try {
                 File uploadFolder = new File(UPLOAD_DIR);
                 if (!uploadFolder.exists()) uploadFolder.mkdirs();
@@ -140,11 +179,13 @@ public class kendaraanController {
                 Files.write(Paths.get(UPLOAD_DIR + namaFile), foto.getBytes());
             } catch (IOException e) {
                 e.printStackTrace();
-                namaFile = null;
+                redirectAttributes.addFlashAttribute("error", "Gagal mengunggah foto, silakan coba lagi.");
+                return "redirect:/admin/kendaraan";
             }
         }
 
-        String sqlKendaraan = "INSERT INTO kendaraan (merk, model, tahun, harga, status, foto) VALUES (?, ?, ?, ?, ?, ?)";
+        // ── Insert ke tabel induk kendaraan — sekarang termasuk warna ──
+        String sqlKendaraan = "INSERT INTO kendaraan (merk, model, tahun, harga, status, warna, foto) VALUES (?, ?, ?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         final String fotoFinal = namaFile;
 
@@ -155,24 +196,37 @@ public class kendaraanController {
             ps.setInt(3, tahun);
             ps.setDouble(4, harga);
             ps.setString(5, status);
-            ps.setString(6, fotoFinal);
+            ps.setString(6, warna);
+            ps.setString(7, fotoFinal);
             return ps;
         }, keyHolder);
 
         Number newId = keyHolder.getKey();
-        if (newId != null) {
-            long idKendaraan = newId.longValue();
-            if (jenisKendaraan.equalsIgnoreCase("Mobil")) {
-                jdbcTemplate.update(
-                    "INSERT INTO mobil (id_kendaraan, mesin_mobil, jenis_mobil, transmisi_mobil, kapasitas_mobil) VALUES (?, ?, ?, ?, ?)",
-                    idKendaraan, "-", "-", "-", 0);
-            } else if (jenisKendaraan.equalsIgnoreCase("Motor")) {
-                jdbcTemplate.update(
-                    "INSERT INTO motor (id_kendaraan, cc, jenis_motor, kapasitas_tangki) VALUES (?, ?, ?, ?)",
-                    idKendaraan, 0, "-", 0.0);
-            }
+        if (newId == null) {
+            redirectAttributes.addFlashAttribute("error", "Gagal menyimpan data kendaraan.");
+            return "redirect:/admin/kendaraan";
+        }
+        long idKendaraan = newId.longValue();
+
+        // ── Insert ke tabel spesifik — sekarang pakai nilai yang benar-benar dikirim user, bukan placeholder ──
+        if (jenisKendaraan.equalsIgnoreCase("Mobil")) {
+            jdbcTemplate.update(
+                "INSERT INTO mobil (id_kendaraan, mesin_mobil, jenis_mobil, transmisi_mobil, kapasitas_mobil) VALUES (?, ?, ?, ?, ?)",
+                idKendaraan,
+                mesinMobil != null ? mesinMobil : "-",
+                jenisMobil != null ? jenisMobil : "-",
+                transmisi != null ? transmisi : "-",
+                kapasitasMobil != null ? kapasitasMobil : 0);
+        } else {
+            jdbcTemplate.update(
+                "INSERT INTO motor (id_kendaraan, cc, jenis_motor, kapasitas_tangki) VALUES (?, ?, ?, ?)",
+                idKendaraan,
+                cc != null ? cc : 0,
+                jenisMotor != null ? jenisMotor : "-",
+                kapasitasTangki != null ? kapasitasTangki : 0.0);
         }
 
+        redirectAttributes.addFlashAttribute("success", "Kendaraan berhasil ditambahkan.");
         return "redirect:/admin/kendaraan";
     }
 

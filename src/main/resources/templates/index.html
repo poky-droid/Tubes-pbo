@@ -79,11 +79,10 @@
 
     <div class="filter-bar">
         <div class="filter-pills" id="statusPills">
-            <button class="f-pill pill-active" data-status="">Semua</button>
-            <button class="f-pill" data-status="tersedia">Tersedia</button>
-            <button class="f-pill" data-status="booking">Booking</button>
-            <button class="f-pill" data-status="terjual">Terjual</button>
-        </div>
+        <button class="f-pill pill-active" data-jenis="">Semua</button>
+        <button class="f-pill" data-jenis="mobil">Mobil</button>
+        <button class="f-pill" data-jenis="motor">Motor</button>
+    </div>
         <div class="filter-divider"></div>
         <input type="text" class="ap-input" id="searchInput" placeholder="Cari merek atau model...">
         <select class="ap-input" id="filterTahun" style="min-width:120px">
@@ -97,13 +96,14 @@
 
    <div class="vehicle-grid" id="vehicleGrid">
     <th:block th:each="k : ${kendaraan}">
-        <div class="v-item"
-             th:attr="
-                data-merk=${k.merk},
-                data-model=${k.model},
-                data-status=${k.status},
-                data-tahun=${k.tahun},
-                data-url=@{/buyer/kendaraan/{id}(id=${k.idKendaraan})}">
+    <div class="v-item"
+         th:attr="
+        data-merk=${k.merk},
+        data-model=${k.model},
+        data-status=${k.status},
+        data-jenis=${k.jenisKendaraan != null ? k.jenisKendaraan : ''},
+        data-tahun=${k.tahun},
+        data-url=@{/buyer/kendaraan/{id}(id=${k.idKendaraan})}">
 
             <div class="vcard">
 
@@ -162,8 +162,8 @@
                         <button th:unless="${k.status == 'tersedia'}"
                                 class="ap-btn disabled wide"
                                 disabled>
-                            <i class="bi bi-x-circle"></i>
-                            Tidak Tersedia
+                            <i class="bi bi-calendar-plus"></i>
+                            tersedia untuk test drive
                         </button>
 
                     </div>
@@ -211,14 +211,15 @@ function calcStats() {
 }
 calcStats();
 
-let activeStatus = '';
+    let activeStatus = '';
 function applyFilter() {
     const q  = document.getElementById('searchInput').value.toLowerCase();
     const yr = document.getElementById('filterTahun').value;
     let visible = 0;
     items.forEach(item => {
         const label = (item.dataset.merk + ' ' + item.dataset.model).toLowerCase();
-        const show  = (!q || label.includes(q)) && (!activeStatus || item.dataset.status === activeStatus) && (!yr || item.dataset.tahun === yr);
+        const jenis = (item.dataset.jenis || '').toLowerCase();
+        const show  = (!q || label.includes(q)) && (!activeStatus || jenis === activeStatus) && (!yr || item.dataset.tahun === yr);
         item.style.display = show ? '' : 'none';
         if (show) visible++;
     });
@@ -237,7 +238,8 @@ document.querySelectorAll('.f-pill').forEach(pill => {
     pill.addEventListener('click', () => {
         document.querySelectorAll('.f-pill').forEach(p => p.classList.remove('pill-active'));
         pill.classList.add('pill-active');
-        activeStatus = pill.dataset.status;
+        activeStatus = pill.dataset.jenis === undefined ? pill.getAttribute('data-jenis') : pill.dataset.jenis;
+        if (activeStatus) activeStatus = activeStatus.toLowerCase();
         applyFilter();
     });
 });

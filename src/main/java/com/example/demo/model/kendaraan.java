@@ -8,6 +8,7 @@ public class kendaraan {
     private double harga;
     private String status;
     private String foto; // ← tambahkan field ini
+    private String jenisKendaraan = ""; // defensive: template may reference this
 
     // Constructor dengan foto
     public kendaraan(Long idKendaraan, String merk, String model, int tahun, double harga, String status, String foto) {
@@ -28,4 +29,7 @@ public class kendaraan {
     public double getHarga()     { return harga; }
     public String getStatus()    { return status; }
     public String getFoto()      { return foto; } // ← tambahkan getter ini
+    // Defensive getter: some templates reference "jenisKendaraan"
+    public String getJenisKendaraan() { return jenisKendaraan; }
+    public void setJenisKendaraan(String jenisKendaraan) { this.jenisKendaraan = jenisKendaraan; }
 }

@@ -59,6 +59,15 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 48px;
     }
+
+    /* Sub-grup field spesifik mobil/motor di modal */
+    .subfield-divider {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--muted);
+      margin: 4px 0 -4px;
+    }
   </style>
 </head>
 <body>
@@ -75,6 +84,10 @@
   </div>
 
   <div class="content">
+
+    <!-- ✅ FIX: tampilkan flash message dari RedirectAttributes (success/error) -->
+    <div th:if="${success}" class="alert alert-success d-flex justify-content-between align-items-center" th:text="${success}" role="alert"></div>
+    <div th:if="${error}" class="alert alert-danger d-flex justify-content-between align-items-center" th:text="${error}" role="alert"></div>
 
     <div class="d-flex gap-2 mb-4 flex-wrap">
       <button class="pill-tab active" data-filter="semua">Semua</button>
@@ -120,7 +133,7 @@
 
       <div th:each="k : ${listKendaraan}"
            class="col-6 col-md-4 col-lg-3"
-           th:attr="data-type=${k.jenis}, data-status=${#strings.toLowerCase(k.status)}">
+           th:attr="data-type=${k.jenis}, data-status=${#strings.toLowerCase(#strings.replace(k.status, ' ', ''))}">
 
         <div class="v-card">
 
@@ -155,7 +168,6 @@
 
           <div class="d-flex gap-2 mt-3">
             <button class="btn-og flex-fill" style="font-size:11px;padding:5px 8px;">Detail</button>
-            <!-- ✅ FIX: path hapus pakai /admin/ -->
             <a th:href="@{/admin/kendaraan/hapus/{id}(id=${k.id_kendaraan})}"
                class="btn-red flex-fill"
                style="font-size:11px; padding:5px 8px; text-decoration:none; text-align:center;"
@@ -177,12 +189,11 @@
   <div class="modal-box">
     <div class="modal-title">Tambah Kendaraan</div>
 
-    <!-- ✅ FIX: th:action dengan path /admin/ yang benar -->
-    <form th:action="@{/admin/kendaraan/tambah}" method="POST" enctype="multipart/form-data">
+    <form th:action="@{/admin/kendaraan/tambah}" method="POST" enctype="multipart/form-data" id="formTambahKendaraan">
       <div class="row g-3">
         <div class="col-6">
           <label class="lbl">Jenis</label>
-          <select name="jenisKendaraan" class="form-c">
+          <select name="jenisKendaraan" id="jenisKendaraanSelect" class="form-c">
             <option value="Mobil">Mobil</option>
             <option value="Motor">Motor</option>
           </select>
@@ -214,6 +225,69 @@
         <div class="col-12">
           <label class="lbl">Warna</label>
           <input name="warna" class="form-c" placeholder="Merah, Putih, Hitam, ..."/>
+        </div>
+
+        <!-- ✅ FIX: field spesifik MOBIL — sebelumnya tidak ada sama sekali di form,
+             jadi nilai yang diterima controller selalu null lalu di-hardcode jadi "-" -->
+        <div class="col-12" id="fieldsMobil">
+          <div class="subfield-divider">Detail Mobil</div>
+          <div class="row g-3">
+            <div class="col-6">
+              <label class="lbl">Jenis Mobil</label>
+              <select name="jenisMobil" class="form-c">
+                <option value="Sedan">Sedan</option>
+                <option value="SUV">SUV</option>
+                <option value="MPV">MPV</option>
+                <option value="Hatchback">Hatchback</option>
+                <option value="Pickup">Pickup</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="lbl">Mesin</label>
+              <select name="mesinMobil" class="form-c">
+                <option value="Bensin">Bensin</option>
+                <option value="Diesel">Diesel</option>
+                <option value="Hybrid">Hybrid</option>
+                <option value="Listrik">Listrik</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="lbl">Transmisi</label>
+              <select name="transmisiMobil" class="form-c">
+                <option value="Manual">Manual</option>
+                <option value="Automatic">Automatic</option>
+                <option value="CVT">CVT</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="lbl">Kapasitas (penumpang)</label>
+              <input name="kapasitasMobil" class="form-c" type="number" placeholder="5"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- ✅ FIX: field spesifik MOTOR — sama, sebelumnya tidak ada di form -->
+        <div class="col-12" id="fieldsMotor" style="display:none;">
+          <div class="subfield-divider">Detail Motor</div>
+          <div class="row g-3">
+            <div class="col-6">
+              <label class="lbl">Jenis Motor</label>
+              <select name="jenisMotor" class="form-c">
+                <option value="Matic">Matic</option>
+                <option value="Manual">Manual</option>
+                <option value="Sport">Sport</option>
+                <option value="Trail">Trail</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="lbl">Kapasitas Mesin (cc)</label>
+              <input name="cc" class="form-c" type="number" placeholder="150"/>
+            </div>
+            <div class="col-6">
+              <label class="lbl">Kapasitas Tangki (liter)</label>
+              <input name="kapasitasTangki" class="form-c" type="number" step="0.1" placeholder="4.2"/>
+            </div>
+          </div>
         </div>
 
         <!-- ── UPLOAD FOTO ── -->
@@ -287,11 +361,28 @@
     });
   });
 
+  // ── Toggle field spesifik Mobil / Motor ─────────────────────────
+  const jenisKendaraanSelect = document.getElementById('jenisKendaraanSelect');
+  const fieldsMobil = document.getElementById('fieldsMobil');
+  const fieldsMotor = document.getElementById('fieldsMotor');
+
+  function toggleJenisFields() {
+    const isMobil = jenisKendaraanSelect.value === 'Mobil';
+    fieldsMobil.style.display = isMobil ? '' : 'none';
+    fieldsMotor.style.display = isMobil ? 'none' : '';
+  }
+  jenisKendaraanSelect.addEventListener('change', toggleJenisFields);
+
   // ── Modal ────────────────────────────────────────────────────────
-  function openModal()  { document.getElementById('modalTambah').classList.add('show'); }
+  function openModal()  {
+    document.getElementById('modalTambah').classList.add('show');
+    toggleJenisFields();
+  }
   function closeModal() {
     document.getElementById('modalTambah').classList.remove('show');
+    document.getElementById('formTambahKendaraan').reset();
     resetFotoUpload();
+    toggleJenisFields();
   }
   document.getElementById('modalTambah').addEventListener('click', e => {
     if (e.target === e.currentTarget) closeModal();
@@ -346,6 +437,9 @@
       fotoInput.dispatchEvent(new Event('change'));
     }
   });
+
+  // State awal saat halaman load
+  toggleJenisFields();
 </script>
 </body>
 </html>

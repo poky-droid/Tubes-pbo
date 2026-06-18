@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${kendaraan.merk + ' ' + kendaraan.model + ' - Detail Kendaraan'}">
+    <title th:text="${kendaraan['merk']} + ' ' + ${kendaraan['model']} + ' - Detail Kendaraan'">
         Detail Kendaraan
     </title>
 
@@ -12,16 +12,19 @@
 
     <style>
         :root{
-            --rust:#C2410C;
-            --rust-dark:#9A3412;
-            --ink:#1C1917;
-            --paper:#FAFAF9;
-            --line:#E7E5E4;
+            --primary:#C2410C;
+            --primary-dark:#9A3412;
+            --bg:#FAFAF9;
+            --card:#FFFFFF;
+            --text:#1C1917;
             --muted:#78716C;
-            --ok-bg:#ECFDF3;
-            --ok-fg:#15803D;
-            --sold-bg:#F4F4F5;
-            --sold-fg:#71717A;
+            --border:#E7E5E4;
+            --success:#15803D;
+            --success-bg:#DCFCE7;
+            --warning:#92400E;
+            --warning-bg:#FEF3C7;
+            --danger:#B91C1C;
+            --danger-bg:#FEE2E2;
         }
 
         *{
@@ -32,32 +35,19 @@
 
         body{
             font-family:'Inter',sans-serif;
-            background:var(--paper);
-            color:var(--ink);
+            background:var(--bg);
+            color:var(--text);
         }
 
-        .topbar{
-            background:#fff;
-            border-bottom:1px solid var(--line);
-        }
-
-        .topbar-inner{
-            max-width:1100px;
+        .container{
+            max-width:1200px;
             margin:auto;
-            padding:18px 24px;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-        }
-
-        .brand{
-            font-family:'Sora',sans-serif;
-            font-weight:800;
-            font-size:20px;
+            padding:30px 20px;
         }
 
         .breadcrumb{
-            font-size:13px;
+            margin-bottom:20px;
+            font-size:14px;
             color:var(--muted);
         }
 
@@ -66,33 +56,32 @@
             text-decoration:none;
         }
 
-        .container{
-            max-width:1100px;
-            margin:auto;
-            padding:32px 24px;
-        }
-
-        .detail-grid{
+        .detail-layout{
             display:grid;
-            grid-template-columns:1.3fr 1fr;
-            gap:40px;
+            grid-template-columns:1.2fr 1fr;
+            gap:30px;
         }
 
-        .gallery{
+        .card{
+            background:var(--card);
+            border:1px solid var(--border);
             border-radius:16px;
             overflow:hidden;
-            background:#fff;
-            border:1px solid var(--line);
         }
 
-        .gallery img{
+        .image-wrapper{
             width:100%;
             height:500px;
-            object-fit:cover;
-            display:block;
+            background:#f5f5f5;
         }
 
-        .placeholder{
+        .image-wrapper img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+
+        .no-image{
             height:500px;
             display:flex;
             justify-content:center;
@@ -100,26 +89,32 @@
             color:var(--muted);
         }
 
-        .info-panel{
-            background:#fff;
-            border:1px solid var(--line);
-            border-radius:16px;
-            padding:24px;
+        .content{
+            padding:25px;
         }
 
-        .eyebrow{
-            color:var(--rust);
-            font-weight:700;
-            text-transform:uppercase;
+        .badge{
+            display:inline-block;
+            padding:6px 12px;
+            border-radius:999px;
             font-size:13px;
-            margin-bottom:8px;
+            font-weight:600;
+            margin-bottom:15px;
         }
 
-        .title{
-            font-family:'Sora',sans-serif;
+        .badge-mobil{
+            background:#DBEAFE;
+            color:#1D4ED8;
+        }
+
+        .badge-motor{
+            background:#FCE7F3;
+            color:#BE185D;
+        }
+
+        h1{
             font-size:32px;
-            font-weight:800;
-            margin-bottom:10px;
+            margin-bottom:8px;
         }
 
         .subtitle{
@@ -128,59 +123,59 @@
         }
 
         .price{
-            font-family:'Sora',sans-serif;
             font-size:36px;
             font-weight:800;
-            margin-bottom:25px;
-            color:var(--rust);
+            color:var(--primary);
+            margin-bottom:20px;
         }
 
         .status{
             display:inline-block;
-            padding:8px 14px;
+            padding:8px 15px;
             border-radius:999px;
             font-size:14px;
             font-weight:600;
-            margin-bottom:24px;
-        }
-
-        .status.available{
-            background:var(--ok-bg);
-            color:var(--ok-fg);
-        }
-
-        .status.sold{
-            background:var(--sold-bg);
-            color:var(--sold-fg);
-        }
-
-        .spec-grid{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:16px;
             margin-bottom:25px;
         }
 
-        .spec-item{
+        .tersedia{
+            background:var(--success-bg);
+            color:var(--success);
+        }
+
+        .disewa{
+            background:var(--warning-bg);
+            color:var(--warning);
+        }
+
+        .perawatan{
+            background:var(--danger-bg);
+            color:var(--danger);
+        }
+
+        .spec-table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        .spec-table tr{
+            border-bottom:1px solid var(--border);
+        }
+
+        .spec-table td{
             padding:14px;
-            border:1px solid var(--line);
-            border-radius:10px;
         }
 
-        .spec-label{
-            display:block;
-            font-size:12px;
-            color:var(--muted);
-            margin-bottom:6px;
-        }
-
-        .spec-value{
+        .spec-table td:first-child{
+            width:220px;
             font-weight:600;
+            background:#fafafa;
         }
 
         .actions{
             display:flex;
-            gap:12px;
+            gap:10px;
+            margin-top:25px;
         }
 
         .btn{
@@ -193,235 +188,212 @@
         }
 
         .btn-primary{
-            background:var(--rust);
+            background:var(--primary);
             color:white;
         }
 
         .btn-secondary{
-            border:1px solid var(--line);
-            color:var(--ink);
+            border:1px solid var(--border);
+            color:var(--text);
             background:white;
         }
 
-        .section{
-            margin-top:40px;
-        }
-
-        .section-title{
-            font-family:'Sora',sans-serif;
-            font-size:24px;
-            margin-bottom:18px;
-        }
-
-        .table{
-            background:white;
-            border:1px solid var(--line);
-            border-radius:10px;
-            overflow:hidden;
-        }
-
-        .row{
-            display:grid;
-            grid-template-columns:200px 1fr;
-        }
-
-        .row:not(:last-child){
-            border-bottom:1px solid var(--line);
-        }
-
-        .row .label{
-            background:#f8f8f8;
-            padding:14px;
-            font-weight:600;
-        }
-
-        .row .value{
-            padding:14px;
+        .btn-disabled{
+            background:#d1d5db;
+            color:#6b7280;
+            cursor:not-allowed;
+            pointer-events:none;
         }
 
         @media(max-width:768px){
-            .detail-grid{
+            .detail-layout{
                 grid-template-columns:1fr;
             }
 
-            .gallery img{
+            .image-wrapper{
                 height:300px;
             }
 
-            .row{
-                grid-template-columns:130px 1fr;
+            .spec-table td:first-child{
+                width:140px;
             }
         }
     </style>
 </head>
 <body>
 
-<div class="topbar">
-    <div class="topbar-inner">
-        <div class="brand">AutoMarket</div>
-
-        <div class="breadcrumb">
-            <a th:href="@{/}">Beranda</a>
-            /
-            <span th:text="${kendaraan.merk + ' ' + kendaraan.model}"></span>
-        </div>
-    </div>
-</div>
-
 <div class="container">
 
-    <div class="detail-grid">
-
-        <!-- FOTO -->
-        <div class="gallery">
-
-            <img th:if="${kendaraan.foto != null}"
-                 th:src="@{${kendaraan.foto}}"
-                 alt="Foto Kendaraan">
-
-            <div class="placeholder"
-                 th:unless="${kendaraan.foto != null}">
-                Tidak ada foto
-            </div>
-
-        </div>
-
-        <!-- INFO -->
-        <div class="info-panel">
-
-            <div class="eyebrow"
-                 th:text="${kendaraan.merk}">
-                Toyota
-            </div>
-
-            <h1 class="title"
-                th:text="${kendaraan.merk + ' ' + kendaraan.model}">
-                Toyota Avanza
-            </h1>
-
-            <div class="subtitle">
-                Tahun
-                <span th:text="${kendaraan.tahun}">2024</span>
-            </div>
-
-            <div class="price">
-                Rp
-                <span th:text="${#numbers.formatDecimal(kendaraan.harga,0,'COMMA',0,'POINT')}">
-                    250000000
-                </span>
-            </div>
-
-            <div th:if="${kendaraan.status == 'TERSEDIA'}"
-                 class="status available">
-                Tersedia
-            </div>
-
-            <div th:unless="${kendaraan.status == 'TERSEDIA'}"
-                 class="status sold">
-                Terjual
-            </div>
-
-            <div class="spec-grid">
-
-                <div class="spec-item">
-                    <span class="spec-label">Merk</span>
-                    <span class="spec-value"
-                          th:text="${kendaraan.merk}">
-                    </span>
-                </div>
-
-                <div class="spec-item">
-                    <span class="spec-label">Model</span>
-                    <span class="spec-value"
-                          th:text="${kendaraan.model}">
-                    </span>
-                </div>
-
-                <div class="spec-item">
-                    <span class="spec-label">Tahun</span>
-                    <span class="spec-value"
-                          th:text="${kendaraan.tahun}">
-                    </span>
-                </div>
-
-                <div class="spec-item">
-                    <span class="spec-label">Status</span>
-                    <span class="spec-value"
-                          th:text="${kendaraan.status}">
-                    </span>
-                </div>
-
-            </div>
-
-            <div class="actions">
-
-                <a class="btn btn-primary"
-                   href="#">
-                    Hubungi Penjual
-                </a>
-
-                <a class="btn btn-secondary"
-                   th:href="@{/}">
-                    Kembali
-                </a>
-
-            </div>
-
-        </div>
-
+    <div class="breadcrumb">
+        <a th:href="@{/buyer/kendaraan}">Kendaraan</a>
+        /
+        <span th:text="${kendaraan['merk']} + ' ' + ${kendaraan['model']}"></span>
     </div>
 
-    <!-- SPESIFIKASI -->
-    <div class="section">
+    <div class="detail-layout">
 
-        <h2 class="section-title">
-            Detail Kendaraan
-        </h2>
+        <!-- FOTO -->
+        <div class="card">
 
-        <div class="table">
+            <div class="image-wrapper">
 
-            <div class="row">
-                <div class="label">ID</div>
-                <div class="value"
-                     th:text="${kendaraan.id_kendaraan}">
+                <img th:if="${kendaraan['foto'] != null}"
+                     th:src="@{/uploads/kendaraan/{foto}(foto=${kendaraan['foto']})}"
+                     alt="Foto Kendaraan">
+
+                <div class="no-image"
+                     th:if="${kendaraan['foto'] == null}">
+                    Tidak ada foto kendaraan
                 </div>
+
             </div>
 
-            <div class="row">
-                <div class="label">Merk</div>
-                <div class="value"
-                     th:text="${kendaraan.merk}">
-                </div>
-            </div>
+        </div>
 
-            <div class="row">
-                <div class="label">Model</div>
-                <div class="value"
-                     th:text="${kendaraan.model}">
-                </div>
-            </div>
+        <!-- DETAIL -->
+        <div class="card">
 
-            <div class="row">
-                <div class="label">Tahun</div>
-                <div class="value"
-                     th:text="${kendaraan.tahun}">
-                </div>
-            </div>
+            <div class="content">
 
-            <div class="row">
-                <div class="label">Harga</div>
-                <div class="value">
+                <span class="badge badge-mobil"
+                      th:if="${kendaraan['jenis'] == 'mobil'}">
+                    🚗 Mobil
+                </span>
+
+                <span class="badge badge-motor"
+                      th:if="${kendaraan['jenis'] == 'motor'}">
+                    🏍️ Motor
+                </span>
+
+                <h1 th:text="${kendaraan['merk']} + ' ' + ${kendaraan['model']}">
+                    Nama Kendaraan
+                </h1>
+
+                <div class="subtitle">
+                    Tahun
+                    <span th:text="${kendaraan['tahun']}"></span>
+                </div>
+
+                <div class="price">
                     Rp
-                    <span th:text="${#numbers.formatDecimal(kendaraan.harga,0,'COMMA',0,'POINT')}">
-                    </span>
+                    <span th:text="${#numbers.formatDecimal(kendaraan['harga'],0,'COMMA',0,'POINT')}"></span>
+                    / Hari
                 </div>
-            </div>
 
-            <div class="row">
-                <div class="label">Status</div>
-                <div class="value"
-                     th:text="${kendaraan.status}">
+                <div class="status tersedia"
+                     th:if="${#strings.equalsIgnoreCase(kendaraan['status'],'Tersedia')}">
+                    Tersedia
                 </div>
+
+                <div class="status disewa"
+                     th:if="${#strings.equalsIgnoreCase(kendaraan['status'],'Disewa')}">
+                    Sedang Disewa
+                </div>
+
+                <div class="status perawatan"
+                     th:if="${#strings.equalsIgnoreCase(kendaraan['status'],'Perawatan')}">
+                    Dalam Perawatan
+                </div>
+
+                <table class="spec-table">
+
+                    <tr>
+                        <td>ID Kendaraan</td>
+                        <td th:text="${kendaraan['id_kendaraan']}"></td>
+                    </tr>
+
+                    <tr>
+                        <td>Merk</td>
+                        <td th:text="${kendaraan['merk']}"></td>
+                    </tr>
+
+                    <tr>
+                        <td>Model</td>
+                        <td th:text="${kendaraan['model']}"></td>
+                    </tr>
+
+                    <tr>
+                        <td>Tahun</td>
+                        <td th:text="${kendaraan['tahun']}"></td>
+                    </tr>
+
+                    <tr>
+                        <td>Warna</td>
+                        <td th:text="${kendaraan['warna']}"></td>
+                    </tr>
+
+                    <tr>
+                        <td>Status</td>
+                        <td th:text="${kendaraan['status']}"></td>
+                    </tr>
+
+                    <!-- DATA MOBIL -->
+                    <th:block th:if="${kendaraan['jenis'] == 'mobil'}">
+
+                        <tr>
+                            <td>Jenis Mobil</td>
+                            <td th:text="${kendaraan['jenis_mobil']}"></td>
+                        </tr>
+
+                        <tr>
+                            <td>Mesin</td>
+                            <td th:text="${kendaraan['mesin_mobil']}"></td>
+                        </tr>
+
+                        <tr>
+                            <td>Transmisi</td>
+                            <td th:text="${kendaraan['transmisi_mobil']}"></td>
+                        </tr>
+
+                        <tr>
+                            <td>Kapasitas</td>
+                            <td th:text="${kendaraan['kapasitas_mobil']} + ' Orang'"></td>
+                        </tr>
+
+                    </th:block>
+
+                    <!-- DATA MOTOR -->
+                    <th:block th:if="${kendaraan['jenis'] == 'motor'}">
+
+                        <tr>
+                            <td>Jenis Motor</td>
+                            <td th:text="${kendaraan['jenis_motor']}"></td>
+                        </tr>
+
+                        <tr>
+                            <td>CC</td>
+                            <td th:text="${kendaraan['cc']} + ' CC'"></td>
+                        </tr>
+
+                        <tr>
+                            <td>Kapasitas Tangki</td>
+                            <td th:text="${kendaraan['kapasitas_tangki']} + ' Liter'"></td>
+                        </tr>
+
+                    </th:block>
+
+                </table>
+
+                <div class="actions">
+
+                    <a th:if="${#strings.equalsIgnoreCase(kendaraan['status'],'Tersedia')}"
+                       th:href="@{'/buyer/sewa/' + ${kendaraan['id_kendaraan']}}"
+                       class="btn btn-primary">
+                        pesan
+                    </a>
+
+                    <a th:unless="${#strings.equalsIgnoreCase(kendaraan['status'],'Tersedia')}"
+                       class="btn btn-disabled">
+                        Tidak Tersedia
+                    </a>
+
+                    <a th:href="@{/}"
+                       class="btn btn-secondary">
+                        Kembali
+                    </a>
+
+                </div>
+
             </div>
 
         </div>
