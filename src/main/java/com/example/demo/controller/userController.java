@@ -50,21 +50,42 @@ public class userController extends user  {
     // ── Proses LOGIN ──────────────────────────────────────────────────────
     @RequestMapping(method = RequestMethod.POST, value = "/loginForm")
     public String loginController(
-            @RequestParam("username") String username,
+            @RequestParam("nama") String nama,
             @RequestParam("password") String password,
             Model model,
             HttpSession session) {
 
         try {
-            String sql = "SELECT id_user, nama, role FROM user WHERE username = ? AND password = ?";
-            Map<String, Object> userData = jdbcTemplate.queryForMap(sql, username, password);
+            // Trim inputs to avoid accidental whitespace
+            String namaTrim = nama == null ? "" : nama.trim();
+            String passTrim = password == null ? "" : password.trim();
 
-            String role = (String) userData.get("role");
+            // Debug: log attempt (do not log passwords in production)
+            System.out.println("[LOGIN] attempt for nama='" + namaTrim + "'");
+
+            String sql = "SELECT id_user, nama, role FROM `user` WHERE nama = ? AND password = ?";
+            System.out.println("[LOGIN] SQL: " + sql + " params:[nama=" + namaTrim + "]");
+
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, namaTrim, passTrim);
+            if (rows == null || rows.isEmpty()) {
+                System.out.println("[LOGIN] no matching user for nama='" + namaTrim + "'");
+                model.addAttribute("loginError", "Username atau password salah.");
+                return "login";
+            }
+            if (rows.size() > 1) {
+                System.err.println("[LOGIN] multiple users matched for nama='" + namaTrim + "' (count=" + rows.size() + ")");
+                model.addAttribute("loginError", "Terjadi kesalahan (duplikasi user). Hubungi admin.");
+                return "login";
+            }
+
+            Map<String, Object> userData = rows.get(0);
+                // role may be NULL in DB; guard against NPE
+                Object roleObj = userData.get("role");
+                String role = roleObj == null ? "" : roleObj.toString();
 
             // ── Simpan data ke session ────────────────────────────
             session.setAttribute("id_user",  userData.get("id_user"));
             session.setAttribute("nama",     userData.get("nama"));
-            session.setAttribute("username", username);
             session.setAttribute("role",     role);
 
             // Jika buyer, simpan juga id_pembeli
@@ -77,7 +98,7 @@ public class userController extends user  {
                 } catch (EmptyResultDataAccessException e) {
                     session.setAttribute("id_pembeli", null);
                 }
-                return "redirect:/buyer/home";
+                return "redirect:/";
             }
 
             if (role.equalsIgnoreCase("owner") || role.equalsIgnoreCase("admin")) {
@@ -87,34 +108,45 @@ public class userController extends user  {
             return "redirect:/";
 
         } catch (EmptyResultDataAccessException e) {
+            System.out.println("[LOGIN] no matching user: " + e.getMessage());
             model.addAttribute("loginError", "Username atau password salah.");
             return "login";
         } catch (Exception e) {
-            model.addAttribute("loginError", "Terjadi kesalahan, coba lagi.");
+            System.err.println("[LOGIN] unexpected error: " + e.getMessage());
+            e.printStackTrace();
+            model.addAttribute("loginError", "Terjadi kesalahan, coba lagi. (" + e.getMessage() + ")");
             return "login";
         }
     }
 
-    // ── Root redirect ─────────────────────────────────────────────────────
-    @RequestMapping(method = RequestMethod.GET, value = "/")
-    public String rootRedirect(HttpSession session) {
-        String role = (String) session.getAttribute("role");
-        if (role != null && (role.equalsIgnoreCase("owner") || role.equalsIgnoreCase("admin"))) {
-            return "redirect:/admin/Dashboard";
-        }
-        if (session.getAttribute("id_pembeli") != null) {
-            return "redirect:/buyer/home";
-        }
+    // If someone hits /loginForm with GET, redirect back to login page instead of throwing 405
+    @GetMapping("/loginForm")
+    public String loginFormGet() {
         return "redirect:/login";
     }
 
-    // ── Halaman Buyer Home / Katalog ──────────────────────────────────────
-    @GetMapping("/buyer/home")
-    public String buyerHome(Model model, HttpSession session) {
-        Integer idPembeli = (Integer) session.getAttribute("id_pembeli");
-        if (idPembeli == null) return "redirect:/login?sessionExpired=true";
+    // ── Halaman Buyer Home ────────────────────────────────────────────────
+    @RequestMapping(method = RequestMethod.GET, value = "/")
+    public String home(Model model, HttpSession session) {
+        Object idUser = session.getAttribute("id_user");
 
-        model.addAttribute("nama", session.getAttribute("nama"));
+        if (idUser != null) {
+            model.addAttribute("isLoggedIn", true);
+            model.addAttribute("nama", session.getAttribute("nama"));
+            model.addAttribute("role", session.getAttribute("role"));
+        } else {
+            model.addAttribute("isLoggedIn", false);
+            model.addAttribute("nama", null);
+    }
+
+
+
+        // Jika sudah login, redirect ke halaman buyer
+        
+
+        // Belum login, tetap tampilkan halaman utama dengan data kendaraan
+        model.addAttribute("isLoggedIn", false);
+        model.addAttribute("nama", null);
 
         String sql = """
             SELECT k.id_kendaraan, k.merk, k.model, k.tahun, k.harga, k.foto, k.status,
@@ -123,6 +155,7 @@ public class userController extends user  {
             FROM kendaraan k
             LEFT JOIN mobil m ON k.id_kendaraan = m.id_kendaraan
             LEFT JOIN motor mo ON k.id_kendaraan = mo.id_kendaraan
+            WHERE k.status = 'tersedia'
             ORDER BY k.id_kendaraan DESC
         """;
 
@@ -145,7 +178,7 @@ public class userController extends user  {
                 }
             );
         } catch (Exception e) {
-            System.out.println("Error query kendaraan: " + e.getMessage());
+            System.out.println("Error query: " + e.getMessage());
         }
 
         System.out.println("Jumlah kendaraan = " + daftarKendaraan.size());
@@ -156,30 +189,15 @@ public class userController extends user  {
 
     // ── Halaman Test Drive Pembeli ────────────────────────────────────────
     @GetMapping("/buyer/testdrive")
-    public String buyerTestdrive(
-            Model model,
-            HttpSession session,
-            @RequestParam(value = "kendaraan", required = false) Integer selectedKendaraan,
-            @RequestParam(value = "error", required = false) String error,
-            @RequestParam(value = "success", required = false) String success) {
-
+    public String buyerTestdrive(Model model, HttpSession session) {
         Integer idPembeli = (Integer) session.getAttribute("id_pembeli");
         if (idPembeli == null) return "redirect:/login?sessionExpired=true";
-
-        if (error != null && error.equals("conflict")) {
-            model.addAttribute("errorMsg", "Jadwal yang dipilih sudah dibooking. Silakan pilih waktu lain.");
-        }
-        if (success != null) {
-            model.addAttribute("successMsg", "Jadwal test drive berhasil dibuat! Menunggu konfirmasi admin.");
-        }
-        model.addAttribute("selectedKendaraan", selectedKendaraan);
 
         try {
             model.addAttribute("nama", session.getAttribute("nama"));
 
-            // List kendaraan untuk dropdown form (status Tersedia atau Test Drive)
-            String sqlKendaraan = "SELECT id_kendaraan, merk, model, tahun, harga, foto, status FROM kendaraan " +
-                "WHERE LOWER(status) IN ('tersedia', 'test drive') ORDER BY merk, model";
+            // List kendaraan untuk dropdown form
+            String sqlKendaraan = "SELECT id_kendaraan, merk, model, tahun, harga, foto, status FROM kendaraan WHERE status = 'tersedia'";
             List<kendaraan> kendaraanList = jdbcTemplate.query(
                 sqlKendaraan,
                 (rs, rowNum) -> new kendaraan(
@@ -202,23 +220,9 @@ public class userController extends user  {
             List<Map<String, Object>> testdriveList = jdbcTemplate.queryForList(sqlTestdrive, idPembeli);
             model.addAttribute("testdriveList", testdriveList);
 
-            // Map kendaraan untuk lookup di history — ambil SEMUA kendaraan
-            // supaya history test drive dengan kendaraan status Terjual/Booking
-            // tetap bisa ditampilkan nama kendaraannya
-            List<kendaraan> semuaKendaraan = jdbcTemplate.query(
-                "SELECT id_kendaraan, merk, model, tahun, harga, foto, status FROM kendaraan",
-                (rs, rowNum) -> new kendaraan(
-                    rs.getLong("id_kendaraan"),
-                    rs.getString("merk"),
-                    rs.getString("model"),
-                    rs.getInt("tahun"),
-                    rs.getDouble("harga"),
-                    rs.getString("status"),
-                    rs.getString("foto")
-                )
-            );
+            // Map kendaraan untuk lookup di history (key = Long)
             Map<Long, kendaraan> kendaraanMap = new HashMap<>();
-            for (kendaraan k : semuaKendaraan) {
+            for (kendaraan k : kendaraanList) {
                 kendaraanMap.put(k.getIdKendaraan(), k);
             }
             model.addAttribute("kendaraanMap", kendaraanMap);
@@ -290,29 +294,28 @@ public class userController extends user  {
 
         try {
             String sqlUser =
-                "SELECT u.id_user, u.nama, u.username, u.email, p.kontak " +
-                "FROM user u " +
-                "JOIN pembeli p ON u.id_user = p.id_user " +
-                "WHERE p.id_pembeli = ?";
-            Map<String, Object> userData;
-            try {
-                userData = jdbcTemplate.queryForMap(sqlUser, idPembeli);
-            } catch (EmptyResultDataAccessException e) {
-                userData = new HashMap<>();
-                userData.put("id_user", null);
-                userData.put("nama",    "Pengguna");
-                userData.put("username","guest");
-                userData.put("email",   "");
-                userData.put("kontak",  "");
-            }
+            "SELECT u.id_user, u.nama, u.username, u.email, p.kontak " +
+            "FROM user u " +
+            "JOIN pembeli p ON u.id_user = p.id_user " +
+            "WHERE p.id_pembeli = ?";
+        Map<String, Object> userData;
+        try {
+            userData = jdbcTemplate.queryForMap(sqlUser, idPembeli);
+        } catch (EmptyResultDataAccessException e) {
+            userData = new HashMap<>();
+            userData.put("id_user", null);
+            userData.put("nama",    "Pengguna");
+            userData.put("username","guest");
+            userData.put("email",   "");
+            userData.put("kontak",  "");
+        }
 
-            Map<String, Object> userMap = new HashMap<>();
-            userMap.put("id_user",  userData.get("id_user"));
-            userMap.put("nama",     userData.get("nama"));
-            userMap.put("username", userData.get("username"));
-            userMap.put("email",    userData.get("email"));
-            userMap.put("kontak",   userData.get("kontak"));
-
+        Map<String, Object> userMap = new HashMap<>();
+        userMap.put("id_user",  userData.get("id_user"));
+        userMap.put("nama",     userData.get("nama"));
+        userMap.put("username", userData.get("username"));
+        userMap.put("email",    userData.get("email"));
+        userMap.put("kontak",   userData.get("kontak"));
             model.addAttribute("user", userMap);
             model.addAttribute("nama", userData.get("nama"));
 
@@ -366,7 +369,7 @@ public class userController extends user  {
     @RequestMapping(method = RequestMethod.POST, value = "/registerForm")
     public String registerController(
             @RequestParam("nama")            String nama,
-            @RequestParam("username")        String username,
+            @RequestParam("email")        String email,
             @RequestParam("password")        String password,
             @RequestParam("confirmPassword") String confirmPassword,
             Model model) {
@@ -381,26 +384,27 @@ public class userController extends user  {
         // 2. Cek username sudah dipakai?
         try {
             Integer existCount = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM user WHERE username = ?", Integer.class, username);
+                "SELECT COUNT(*) FROM user WHERE email = ?", Integer.class, email);
             if (existCount != null && existCount > 0) {
-                model.addAttribute("registerError", "Username sudah digunakan, pilih yang lain.");
+                model.addAttribute("registerError", "Email sudah digunakan, pilih yang lain.");
                 model.addAttribute("showRegister", true);
                 return "login";
             }
         } catch (Exception e) {
-            model.addAttribute("registerError", "Terjadi kesalahan saat cek username.");
+            model.addAttribute("registerError", "Terjadi kesalahan saat cek email.");
             model.addAttribute("showRegister", true);
             return "login";
         }
+        String Role = "pembeli";
 
         // 3. Simpan ke tabel user
         try {
             jdbcTemplate.update(
-                "INSERT INTO user (nama, username, password) VALUES (?, ?, ?)",
-                nama, username, password);
+                "INSERT INTO user (nama, email, password, role) VALUES (?, ?, ?, ?)",
+                nama, email, password, Role);
 
             Long idUser = jdbcTemplate.queryForObject(
-                "SELECT id_user FROM user WHERE username = ?", Long.class, username);
+                "SELECT id_user FROM user WHERE email = ?", Long.class, email);
 
             if (idUser != null) {
                 jdbcTemplate.update("INSERT INTO pembeli (id_user) VALUES (?)", idUser);
@@ -416,14 +420,21 @@ public class userController extends user  {
         }
     }
 
+    // Redirect GET /registerForm to login page and open register panel
+    @GetMapping("/registerForm")
+    public String registerFormGet() {
+        return "redirect:/login?showRegister=true";
+    }
+
     // ── Live-check username (AJAX dari form register) ─────────────────────
     @GetMapping("/checkUsername")
     @ResponseBody
     public Map<String, Boolean> checkUsername(@RequestParam("username") String username) {
         Map<String, Boolean> result = new HashMap<>();
         try {
+            // The register form uses the email input as the 'username' field, so check email uniqueness
             Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM user WHERE username = ?", Integer.class, username);
+                "SELECT COUNT(*) FROM user WHERE email = ?", Integer.class, username);
             result.put("taken", count != null && count > 0);
         } catch (Exception e) {
             result.put("taken", false);

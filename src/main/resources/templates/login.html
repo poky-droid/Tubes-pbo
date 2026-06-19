@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Artomoro Showroom – Login</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
-  <link rel="stylesheet" href="/css/style1.css"/>
+  <link rel="stylesheet" href="/css/style0.css"/>
   <style>
     /* ── Panel kanan: dua form bisa di-toggle ── */
     .auth-panel { width: 100%; }
@@ -75,8 +75,8 @@
         <form id="loginForm" action="/loginForm" method="POST" novalidate>
           <div class="form-group">
             <div class="input-wrapper">
-              <input type="text" id="username" name="username" placeholder=" " required autocomplete="username"/>
-              <label for="username">Username</label>
+              <input type="text" id="nama" name="nama" placeholder=" " required autocomplete="username"/>
+              <label for="nama">Username</label>
             </div>
             <span class="error-message" id="usernameError"></span>
           </div>
@@ -125,13 +125,13 @@
 
           <div class="form-group">
             <div class="input-wrapper">
-              <input type="text" id="reg_username" name="username" placeholder=" " required autocomplete="username"
+              <input type="email" id="reg_username" name="email" placeholder=" " required autocomplete="username"
                      oninput="checkUsername(this.value)"/>
-              <label for="reg_username">Username</label>
+              <label for="reg_username">Email</label>
             </div>
             <span class="error-message" id="regUsernameError"></span>
             <span id="usernameOk" style="font-size:12px;color:#00A650;display:none">
-              <i class="bi bi-check-circle-fill"></i> Username tersedia
+              <i class="bi bi-check-circle-fill"></i> Email tersedia
             </span>
           </div>
 
