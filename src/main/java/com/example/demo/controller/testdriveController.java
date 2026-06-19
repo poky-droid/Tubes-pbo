@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -22,8 +23,20 @@ public class testdriveController  extends BaseController {
 
     // Admin testdrive page (original)
     @GetMapping("/admin/testdrive")
-    public String adminShowTestDrive(Model model, HttpSession session) {
+    public String adminShowTestDrive(
+            Model model, 
+            HttpSession session,
+            @RequestParam(value = "error", required = false) String error,
+            @RequestParam(value = "success", required = false) String success) {
+            
          if (!isOwner(session)) return "redirect:/login?accessDenied=true";
+         
+         if (error != null && error.equals("conflict")) {
+             model.addAttribute("errorMsg", "Jadwal yang dipilih sudah dibooking. Silakan pilih waktu lain.");
+         }
+         if (success != null) {
+             model.addAttribute("successMsg", "Jadwal berhasil disimpan.");
+         }
         
         try {
             // 1. Ambil data Daftar Jadwal Test Drive
@@ -98,8 +111,26 @@ public class testdriveController  extends BaseController {
         
         try {
             // Memasukkan data jadwal baru ke dalam tabel testdrive
-            String sql = "INSERT INTO testdrive (id_pembeli, id_kendaraan, tanggal, jam, status, catatan) VALUES (?, ?, ?, ?, ?, ?)";
-            jdbcTemplate.update(sql, idPembeli, idKendaraan, tanggal, jam, status, catatan);
+            // Validasi & Insert menggunakan 1 query untuk mencegah Race Condition:
+            // Hanya insert jika belum ada booking aktif (Pending/Aktif/Terkonfirmasi)
+            // di kendaraan, tanggal, dan jam yang sama.
+            String sql = 
+                "INSERT INTO testdrive (id_pembeli, id_kendaraan, tanggal, jam, status, catatan) " +
+                "SELECT ?, ?, ?, ?, ?, ? FROM DUAL " +
+                "WHERE NOT EXISTS (" +
+                "   SELECT 1 FROM testdrive " +
+                "   WHERE id_kendaraan = ? AND tanggal = ? AND jam = ? " +
+                "   AND status IN ('Pending', 'Aktif', 'Terkonfirmasi')" +
+                ")";
+            
+            int rowsAffected = jdbcTemplate.update(sql, 
+                idPembeli, idKendaraan, tanggal, jam, status, catatan,
+                idKendaraan, tanggal, jam);
+
+            if (rowsAffected == 0) {
+                // Booking gagal karena jadwal sudah ada yang ambil
+                return "redirect:/admin/testdrive?error=conflict";
+            }
             
         } catch (Exception e) {
             System.err.println("===== ERROR TAMBAH TEST DRIVE =====");
@@ -108,7 +139,7 @@ public class testdriveController  extends BaseController {
         }
         
         // Setelah berhasil menyimpan, refresh halaman kembali ke menu test drive
-        return "redirect:/admin/testdrive";
+        return "redirect:/admin/testdrive?success=true";
     }
 
     // --- FUNGSI UNTUK MENGUBAH STATUS TEST DRIVE (ACC / TOLAK / SELESAI) ---
@@ -141,5 +172,68 @@ public class testdriveController  extends BaseController {
     //     public String buyerShowTestDrive() {
     //         return "buyer-testdrive";
     //      }
+
+
+    // --- BUYER: SUBMIT JADWAL TEST DRIVE BARU ---
+    @PostMapping("/buyer/testdrive")
+    public String buyerSubmitTestDrive(
+            HttpSession session,
+            @RequestParam("idKendaraan") Integer idKendaraan,
+            @RequestParam("tanggal") String tanggal,
+            @RequestParam("jam") String jam,
+            @RequestParam(value = "catatan", required = false) String catatan) {
+
+        Integer idPembeli = (Integer) session.getAttribute("id_pembeli");
+        if (idPembeli == null) return "redirect:/login?sessionExpired=true";
+
+        try {
+            // Ambil id_owner pertama yang ada (showroom owner)
+            Integer idOwner = null;
+            try {
+                idOwner = jdbcTemplate.queryForObject(
+                    "SELECT id_owner FROM owner LIMIT 1", Integer.class);
+            } catch (Exception ex) {
+                System.err.println("Tidak ada data owner: " + ex.getMessage());
+            }
+
+            // Validasi & Insert menggunakan 1 query untuk mencegah Race Condition:
+            // Hanya insert jika belum ada booking aktif (Pending/Aktif/Terkonfirmasi)
+            // di kendaraan, tanggal, dan jam yang sama.
+            String sql = 
+                "INSERT INTO testdrive (id_pembeli, id_kendaraan, tanggal, jam, status, catatan, id_owner) " +
+                "SELECT ?, ?, ?, ?, 'Pending', ?, ? FROM DUAL " +
+                "WHERE NOT EXISTS (" +
+                "   SELECT 1 FROM testdrive " +
+                "   WHERE id_kendaraan = ? AND tanggal = ? AND jam = ? " +
+                "   AND status IN ('Pending', 'Aktif', 'Terkonfirmasi')" +
+                ")";
+            
+            int rowsAffected = jdbcTemplate.update(sql, 
+                idPembeli, idKendaraan, tanggal, jam, catatan, idOwner,
+                idKendaraan, tanggal, jam);
+
+            if (rowsAffected == 0) {
+                // Booking gagal karena jadwal sudah ada yang ambil
+                return "redirect:/buyer/testdrive?error=conflict&kendaraan=" + idKendaraan;
+            }
+
+            System.out.println("Jadwal test drive berhasil dibuat untuk pembeli " + idPembeli);
+
+        } catch (Exception e) {
+            System.err.println("===== ERROR SUBMIT TEST DRIVE BUYER =====");
+            System.err.println("Pesan Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return "redirect:/buyer/testdrive?success=true";
+    }
+
+    // --- API UNTUK MENGAMBIL SLOT JADWAL YANG SUDAH DIBOOKING ---
+    @GetMapping("/api/testdrive/booked")
+    @ResponseBody
+    public List<Map<String, Object>> getBookedSlots(@RequestParam("idKendaraan") Integer idKendaraan) {
+        String sql = "SELECT tanggal, jam FROM testdrive WHERE id_kendaraan = ? AND status IN ('Pending', 'Aktif', 'Terkonfirmasi')";
+        return jdbcTemplate.queryForList(sql, idKendaraan);
+    }
 
 }

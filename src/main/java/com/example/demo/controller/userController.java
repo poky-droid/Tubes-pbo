@@ -77,7 +77,7 @@ public class userController extends user  {
                 } catch (EmptyResultDataAccessException e) {
                     session.setAttribute("id_pembeli", null);
                 }
-                return "redirect:/";
+                return "redirect:/buyer/home";
             }
 
             if (role.equalsIgnoreCase("owner") || role.equalsIgnoreCase("admin")) {
@@ -95,17 +95,26 @@ public class userController extends user  {
         }
     }
 
-    // ── Halaman Buyer Home ────────────────────────────────────────────────
+    // ── Root redirect ─────────────────────────────────────────────────────
     @RequestMapping(method = RequestMethod.GET, value = "/")
-    public String home(Model model, HttpSession session) {
+    public String rootRedirect(HttpSession session) {
+        String role = (String) session.getAttribute("role");
+        if (role != null && (role.equalsIgnoreCase("owner") || role.equalsIgnoreCase("admin"))) {
+            return "redirect:/admin/Dashboard";
+        }
+        if (session.getAttribute("id_pembeli") != null) {
+            return "redirect:/buyer/home";
+        }
+        return "redirect:/login";
+    }
 
+    // ── Halaman Buyer Home / Katalog ──────────────────────────────────────
+    @GetMapping("/buyer/home")
+    public String buyerHome(Model model, HttpSession session) {
+        Integer idPembeli = (Integer) session.getAttribute("id_pembeli");
+        if (idPembeli == null) return "redirect:/login?sessionExpired=true";
 
-        // Jika sudah login, redirect ke halaman buyer
-        
-
-        // Belum login, tetap tampilkan halaman utama dengan data kendaraan
-        model.addAttribute("isLoggedIn", false);
-        model.addAttribute("nama", null);
+        model.addAttribute("nama", session.getAttribute("nama"));
 
         String sql = """
             SELECT k.id_kendaraan, k.merk, k.model, k.tahun, k.harga, k.foto, k.status,
@@ -114,7 +123,6 @@ public class userController extends user  {
             FROM kendaraan k
             LEFT JOIN mobil m ON k.id_kendaraan = m.id_kendaraan
             LEFT JOIN motor mo ON k.id_kendaraan = mo.id_kendaraan
-            WHERE k.status = 'tersedia'
             ORDER BY k.id_kendaraan DESC
         """;
 
@@ -137,7 +145,7 @@ public class userController extends user  {
                 }
             );
         } catch (Exception e) {
-            System.out.println("Error query: " + e.getMessage());
+            System.out.println("Error query kendaraan: " + e.getMessage());
         }
 
         System.out.println("Jumlah kendaraan = " + daftarKendaraan.size());
@@ -148,15 +156,30 @@ public class userController extends user  {
 
     // ── Halaman Test Drive Pembeli ────────────────────────────────────────
     @GetMapping("/buyer/testdrive")
-    public String buyerTestdrive(Model model, HttpSession session) {
+    public String buyerTestdrive(
+            Model model,
+            HttpSession session,
+            @RequestParam(value = "kendaraan", required = false) Integer selectedKendaraan,
+            @RequestParam(value = "error", required = false) String error,
+            @RequestParam(value = "success", required = false) String success) {
+
         Integer idPembeli = (Integer) session.getAttribute("id_pembeli");
         if (idPembeli == null) return "redirect:/login?sessionExpired=true";
+
+        if (error != null && error.equals("conflict")) {
+            model.addAttribute("errorMsg", "Jadwal yang dipilih sudah dibooking. Silakan pilih waktu lain.");
+        }
+        if (success != null) {
+            model.addAttribute("successMsg", "Jadwal test drive berhasil dibuat! Menunggu konfirmasi admin.");
+        }
+        model.addAttribute("selectedKendaraan", selectedKendaraan);
 
         try {
             model.addAttribute("nama", session.getAttribute("nama"));
 
-            // List kendaraan untuk dropdown form
-            String sqlKendaraan = "SELECT id_kendaraan, merk, model, tahun, harga, foto, status FROM kendaraan WHERE status = 'tersedia'";
+            // List kendaraan untuk dropdown form (status Tersedia atau Test Drive)
+            String sqlKendaraan = "SELECT id_kendaraan, merk, model, tahun, harga, foto, status FROM kendaraan " +
+                "WHERE LOWER(status) IN ('tersedia', 'test drive') ORDER BY merk, model";
             List<kendaraan> kendaraanList = jdbcTemplate.query(
                 sqlKendaraan,
                 (rs, rowNum) -> new kendaraan(
@@ -179,9 +202,23 @@ public class userController extends user  {
             List<Map<String, Object>> testdriveList = jdbcTemplate.queryForList(sqlTestdrive, idPembeli);
             model.addAttribute("testdriveList", testdriveList);
 
-            // Map kendaraan untuk lookup di history (key = Long)
+            // Map kendaraan untuk lookup di history — ambil SEMUA kendaraan
+            // supaya history test drive dengan kendaraan status Terjual/Booking
+            // tetap bisa ditampilkan nama kendaraannya
+            List<kendaraan> semuaKendaraan = jdbcTemplate.query(
+                "SELECT id_kendaraan, merk, model, tahun, harga, foto, status FROM kendaraan",
+                (rs, rowNum) -> new kendaraan(
+                    rs.getLong("id_kendaraan"),
+                    rs.getString("merk"),
+                    rs.getString("model"),
+                    rs.getInt("tahun"),
+                    rs.getDouble("harga"),
+                    rs.getString("status"),
+                    rs.getString("foto")
+                )
+            );
             Map<Long, kendaraan> kendaraanMap = new HashMap<>();
-            for (kendaraan k : kendaraanList) {
+            for (kendaraan k : semuaKendaraan) {
                 kendaraanMap.put(k.getIdKendaraan(), k);
             }
             model.addAttribute("kendaraanMap", kendaraanMap);

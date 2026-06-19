@@ -121,9 +121,9 @@
 
                     <div class="vcard-badge">
                         <span class="ap-badge"
-                              th:classappend="'badge-' + ${k.status}"
+                              th:classappend="'badge-' + ${#strings.replace(#strings.toLowerCase(k.status),' ','-')}"
                               th:text="${k.status}">
-                            tersedia
+                            Tersedia
                         </span>
                     </div>
 
@@ -152,18 +152,18 @@
 
                     <div class="vcard-actions">
 
-                        <a th:if="${k.status == 'tersedia'}"
+                        <a th:if="${#strings.equalsIgnoreCase(k.status,'Tersedia') or #strings.equalsIgnoreCase(k.status,'Test Drive')}"
                            th:href="@{/buyer/testdrive(kendaraan=${k.idKendaraan})}"
                            class="ap-btn dark wide">
                             <i class="bi bi-calendar-plus"></i>
                             Jadwalkan Test Drive
                         </a>
 
-                        <button th:unless="${k.status == 'tersedia'}"
+                        <button th:unless="${#strings.equalsIgnoreCase(k.status,'Tersedia') or #strings.equalsIgnoreCase(k.status,'Test Drive')}"
                                 class="ap-btn disabled wide"
                                 disabled>
-                            <i class="bi bi-calendar-plus"></i>
-                            tersedia untuk test drive
+                            <i class="bi bi-x-circle"></i>
+                            Tidak Tersedia
                         </button>
 
                     </div>
@@ -206,8 +206,13 @@ years.forEach(y => { const o = document.createElement('option'); o.value = y; o.
 
 function calcStats() {
     document.getElementById('statTotal').textContent    = items.length;
-    document.getElementById('statTersedia').textContent = items.filter(i => i.dataset.status === 'tersedia').length;
-    document.getElementById('statTerjual').textContent  = items.filter(i => i.dataset.status === 'terjual').length;
+    // Tersedia = status 'Tersedia' ATAU 'Test Drive' (keduanya bisa dijadwalkan test drive)
+    document.getElementById('statTersedia').textContent = items.filter(i =>
+        ['tersedia','test drive'].includes((i.dataset.status || '').toLowerCase())
+    ).length;
+    document.getElementById('statTerjual').textContent  = items.filter(i =>
+        (i.dataset.status || '').toLowerCase() === 'terjual'
+    ).length;
 }
 calcStats();
 
@@ -231,7 +236,7 @@ function resetFilters() {
     document.getElementById('filterTahun').value = '';
     activeStatus = '';
     document.querySelectorAll('.f-pill').forEach(p => p.classList.remove('pill-active'));
-    document.querySelector('.f-pill[data-status=""]').classList.add('pill-active');
+    document.querySelector('.f-pill[data-jenis=""]').classList.add('pill-active');
     applyFilter();
 }
 document.querySelectorAll('.f-pill').forEach(pill => {

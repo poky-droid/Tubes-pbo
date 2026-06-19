@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${kendaraan['merk']} + ' ' + ${kendaraan['model']} + ' - Detail Kendaraan'">
+    <title th:text="${kendaraan['merk']} + ' ' + ${kendaraan['model']} + ' - Detail Kendaraan | Artomoro Showroom'">
         Detail Kendaraan
     </title>
 
@@ -205,27 +205,102 @@
             pointer-events:none;
         }
 
+        /* ── Navbar ──────────────────────────────────── */
+        .ap-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #111;
+            border-bottom: 1px solid #222;
+        }
+        .nav-inner {
+            max-width: 1200px;
+            margin: auto;
+            padding: 0 20px;
+            height: 58px;
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+        .nav-logo {
+            font-weight: 700;
+            font-size: 16px;
+            color: #fff;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+        .nav-links {
+            display: flex;
+            gap: 4px;
+            flex: 1;
+        }
+        .nav-links a {
+            color: #aaa;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: color .15s, background .15s;
+        }
+        .nav-links a:hover, .nav-links a.nav-active {
+            color: #fff;
+            background: rgba(255,255,255,.08);
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .nav-user { color: #aaa; font-size: 14px; }
+        .btn-nav {
+            background: #333;
+            color: #fff;
+            border: none;
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background .15s;
+        }
+        .btn-nav:hover { background: #444; }
+
         @media(max-width:768px){
             .detail-layout{
                 grid-template-columns:1fr;
             }
-
             .image-wrapper{
                 height:300px;
             }
-
             .spec-table td:first-child{
                 width:140px;
             }
+            .nav-links { display: none; }
         }
     </style>
 </head>
 <body>
 
+<nav class="ap-nav">
+    <div class="nav-inner">
+        <a href="/buyer/home" class="nav-logo">Artomoro Showroom</a>
+        <div class="nav-links">
+            <a href="/buyer/home" class="nav-active">&#9783; Katalog</a>
+            <a href="/buyer/testdrive">&#128197; Test Drive</a>
+            <a href="/buyer/pesanan">&#128722; Pesanan</a>
+            <a href="/buyer/profil">&#128100; Profil</a>
+        </div>
+        <div class="nav-right">
+            <span class="nav-user" th:text="${nama}">Pengguna</span>
+            <a href="/logout" class="btn-nav">Keluar</a>
+        </div>
+    </div>
+</nav>
+
 <div class="container">
 
     <div class="breadcrumb">
-        <a th:href="@{/buyer/kendaraan}">Kendaraan</a>
+        <a th:href="@{/buyer/home}">&#8592; Kembali ke Katalog</a>
         /
         <span th:text="${kendaraan['merk']} + ' ' + ${kendaraan['model']}"></span>
     </div>
@@ -376,18 +451,18 @@
 
                 <div class="actions">
 
-                    <a th:if="${#strings.equalsIgnoreCase(kendaraan['status'],'Tersedia')}"
-                       th:href="@{'/buyer/sewa/' + ${kendaraan['id_kendaraan']}}"
+                    <a th:if="${#strings.equalsIgnoreCase(kendaraan['status'],'Tersedia') or #strings.equalsIgnoreCase(kendaraan['status'],'Test Drive')}"
+                       th:href="@{/buyer/testdrive(kendaraan=${kendaraan['id_kendaraan']})}"
                        class="btn btn-primary">
-                        pesan
+                        Jadwalkan Test Drive
                     </a>
 
-                    <a th:unless="${#strings.equalsIgnoreCase(kendaraan['status'],'Tersedia')}"
+                    <a th:unless="${#strings.equalsIgnoreCase(kendaraan['status'],'Tersedia') or #strings.equalsIgnoreCase(kendaraan['status'],'Test Drive')}"
                        class="btn btn-disabled">
-                        Tidak Tersedia
+                        Tidak Tersedia untuk Test Drive
                     </a>
 
-                    <a th:href="@{/}"
+                    <a th:href="@{/buyer/home}"
                        class="btn btn-secondary">
                         Kembali
                     </a>

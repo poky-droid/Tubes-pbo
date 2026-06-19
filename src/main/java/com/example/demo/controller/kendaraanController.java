@@ -37,7 +37,11 @@ public class kendaraanController {
 
 
     @GetMapping("/buyer/kendaraan/{id}")
-    public String detailKendaraan(@PathVariable Long id, Model model) {
+    public String detailKendaraan(@PathVariable Long id, Model model, HttpSession session) {
+
+        // Session guard
+        Integer idPembeli = (Integer) session.getAttribute("id_pembeli");
+        if (idPembeli == null) return "redirect:/login?sessionExpired=true";
 
         String sql = """
             SELECT
@@ -70,10 +74,11 @@ public class kendaraanController {
         if (data.isEmpty()) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
-                    "Kendaraan tidak ditemukan");
+                    "Kendaraan dengan ID " + id + " tidak ditemukan");
         }
 
         model.addAttribute("kendaraan", data.get(0));
+        model.addAttribute("nama", session.getAttribute("nama"));
 
         return "buyer-kendaraan-detail";
     }
