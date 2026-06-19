@@ -14,13 +14,13 @@
     <div class="nav-inner">
         <a href="/buyer/home" class="nav-logo">Artomoro Showroom</a>
         <div class="nav-links">
-            <a href="/buyer/home">    <i class="bi bi-grid-3x3-gap-fill"></i> Katalog</a>
+            <a href="/">    <i class="bi bi-grid-3x3-gap-fill"></i> Katalog</a>
             <a href="/buyer/testdrive"><i class="bi bi-calendar-check"></i> Test Drive</a>
             <a href="/buyer/pesanan"> <i class="bi bi-bag-check"></i> Pesanan</a>
             <a href="/buyer/profil"   class="nav-active"><i class="bi bi-person-circle"></i> Profil</a>
         </div>
         <div class="nav-right">
-            <span class="nav-user" th:text="${nama}">Pengguna</span>
+            <span class="nav-user" th:text="${nama}"></span>
             <a href="/logout" class="btn-nav"><i class="bi bi-box-arrow-right"></i> Keluar</a>
         </div>
     </div>
@@ -28,7 +28,7 @@
 
 <!-- MOBILE BAR -->
 <div class="mob-bar">
-    <a href="/buyer/home" class="mob-logo">Artomoro Showroom</a>
+    <a href="/" class="mob-logo">Artomoro Showroom</a>
     <button class="mob-btn" onclick="openDrawer()"><i class="bi bi-list"></i></button>
 </div>
 <div class="mob-overlay" id="mobOverlay" onclick="closeDrawer()"></div>
@@ -38,7 +38,7 @@
         <button class="drawer-close" onclick="closeDrawer()"><i class="bi bi-x"></i></button>
     </div>
     <div class="drawer-nav">
-        <a href="/buyer/home">    <i class="bi bi-grid-3x3-gap-fill"></i> Katalog</a>
+        <a href="/">    <i class="bi bi-grid-3x3-gap-fill"></i> Katalog</a>
         <a href="/buyer/testdrive"><i class="bi bi-calendar-check"></i> Test Drive</a>
         <a href="/buyer/pesanan"> <i class="bi bi-bag-check"></i> Pesanan</a>
         <a href="/buyer/profil"   class="nav-active"><i class="bi bi-person-circle"></i> Profil</a>
@@ -65,7 +65,7 @@
                 <div class="profile-header">
                     <div class="profile-ava"><i class="bi bi-person-fill"></i></div>
                     <div class="profile-name" th:text="${user.nama}">Nama User</div>
-                    <div class="profile-un"><i class="bi bi-at"></i><span th:text="${user.username}">username</span></div>
+                    <div class="profile-un"><i class="bi bi-at"></i><span th:text="${user.nama}">username</span></div>
                     <div class="profile-role-badge"><i class="bi bi-person-check"></i> Pembeli</div>
                 </div>
                 <div class="profile-body">

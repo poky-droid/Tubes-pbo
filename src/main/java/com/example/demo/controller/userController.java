@@ -294,7 +294,7 @@ public class userController extends user  {
 
         try {
             String sqlUser =
-            "SELECT u.id_user, u.nama, u.username, u.email, p.kontak " +
+            "SELECT u.id_user, u.nama, u.email, p.kontak " +
             "FROM user u " +
             "JOIN pembeli p ON u.id_user = p.id_user " +
             "WHERE p.id_pembeli = ?";
@@ -305,7 +305,6 @@ public class userController extends user  {
             userData = new HashMap<>();
             userData.put("id_user", null);
             userData.put("nama",    "Pengguna");
-            userData.put("username","guest");
             userData.put("email",   "");
             userData.put("kontak",  "");
         }
