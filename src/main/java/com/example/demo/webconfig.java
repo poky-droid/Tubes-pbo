@@ -16,3 +16,5 @@ public class webconfig implements WebMvcConfigurer {
                 .addResourceLocations("file:" + uploadPath);
     }
 }
+
+//test
