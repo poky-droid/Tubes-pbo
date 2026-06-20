@@ -66,21 +66,21 @@
         </div>
 
         <div class="sec-title mb-3" style="font-size:12px">Aksi Owner</div>
-        <a href="/penjualan" class="action-link">
+        <a href="/admin/penjualan" class="action-link">
           <div>
             <div style="font-size:13px; font-weight:600; color:var(--gold)"><i class="bi bi-check-square me-2"></i>ACC / Tolak Permintaan</div>
             <div style="font-size:11px; color:var(--muted); margin-left: 24px;" th:text="${totalPending} + ' permintaan menunggu'">0 menunggu</div>
           </div>
           <i class="bi bi-chevron-right" style="color:var(--muted)"></i>
         </a>
-        <a href="/kendaraan" class="action-link">
+        <a href="/admin/kendaraan" class="action-link">
           <div>
             <div style="font-size:13px; font-weight:600; color:var(--blue)"><i class="bi bi-car-front me-2"></i>Kelola Kendaraan</div>
             <div style="font-size:11px; color:var(--muted); margin-left: 24px;" th:text="${totalKendaraan} + ' unit dalam stok'">0 stok</div>
           </div>
           <i class="bi bi-chevron-right" style="color:var(--muted)"></i>
         </a>
-        <a href="/laporan" class="action-link">
+        <a href="/admin/laporan" class="action-link">
           <div>
             <div style="font-size:13px; font-weight:600; color:var(--green)"><i class="bi bi-file-earmark-bar-graph me-2"></i>Cetak Laporan</div>
             <div style="font-size:11px; color:var(--muted); margin-left: 24px;">Laporan transaksi & stok</div>
@@ -94,15 +94,14 @@
         
         <div class="card-c mb-4">
           <div class="sec-title mb-4">Informasi Akun</div>
-          <form action="/profil/update" method="POST" id="formProfil">
+          <form action="/admin/profil/update" method="POST" id="formProfil">
             <input type="hidden" name="idUser" th:value="${owner.id_user}" />
             <input type="hidden" name="idOwner" th:value="${owner.id_owner}" />
             
             <div class="row g-3">
               <div class="col-md-6"><label class="lbl">Nama Lengkap</label><input type="text" name="nama" class="form-prof prof-input" th:value="${owner.nama}" readonly required/></div>
-              <div class="col-md-6"><label class="lbl">Username</label><input type="text" name="username" class="form-prof prof-input" th:value="${owner.username}" readonly required/></div>
               <div class="col-md-6"><label class="lbl">Email</label><input type="email" name="email" class="form-prof prof-input" th:value="${owner.email}" readonly required/></div>
-              <div class="col-md-6"><label class="lbl">No. Telepon</label><input type="text" name="kontak" class="form-prof prof-input" th:value="${owner.kontak}" readonly/></div>
+              <div class="col-md-6"><label class="lbl">No. Telepon</label><input type="text" name="kontak" class="form-prof prof-input" th:value="${owner.kontak}" readonly/>
               <div class="col-md-6"><label class="lbl">Kota</label><input type="text" name="kota" class="form-prof prof-input" th:value="${owner.kota}" readonly/></div>
               <div class="col-md-6"><label class="lbl">Provinsi</label><input type="text" name="provinsi" class="form-prof prof-input" th:value="${owner.provinsi}" readonly/></div>
             </div>
@@ -120,7 +119,7 @@
             Password lama yang Anda masukkan salah!
           </div>
 
-          <form action="/profil/password" method="POST" id="formPassword">
+          <form action="/admin/profil/password" method="POST" id="formPassword">
             <input type="hidden" name="idUser" th:value="${owner.id_user}" />
             <div class="row g-3">
               <div class="col-md-6"><label class="lbl">Password Lama</label><input type="password" name="passwordLama" class="form-c" placeholder="••••••••" required/></div>

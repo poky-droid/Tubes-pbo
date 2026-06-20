@@ -25,14 +25,14 @@ public class ownerController extends BaseController {
 
         try {
             // 1. Ambil data Owner
-            String sqlOwner = "SELECT u.id_user, o.id_owner, u.nama, u.username, u.email, o.kontak, o.kota, o.provinsi " +
+            String sqlOwner = "SELECT u.id_user, o.id_owner, u.nama, u.email, o.kontak, o.kota, o.provinsi " +
                               "FROM `user` u JOIN owner o ON u.id_user = o.id_user LIMIT 1";
             List<Map<String, Object>> owners = jdbcTemplate.queryForList(sqlOwner);
             
             // Jika kosong, otomatis buat 1 akun default
             if (owners.isEmpty()) {
-                jdbcTemplate.update("INSERT IGNORE INTO `user` (nama, username, email, password, role) VALUES ('Admin Owner', 'adminowner', 'owner@autoprime.id', '12345', 'Owner')");
-                Integer newUserId = jdbcTemplate.queryForObject("SELECT id_user FROM `user` WHERE username = 'adminowner'", Integer.class);
+                jdbcTemplate.update("INSERT IGNORE INTO `user` (nama, email, password, role) VALUES ('Admin Owner', 'owner@autoprime.id', '12345', 'Owner')");
+                Integer newUserId = jdbcTemplate.queryForObject("SELECT id_user FROM `user` WHERE nama = 'Admin Owner'", Integer.class);
                 jdbcTemplate.update("INSERT INTO owner (id_user, kontak, kota, provinsi) VALUES (?, '0812-9999-8888', 'Tasikmalaya', 'Jawa Barat')", newUserId);
                 owners = jdbcTemplate.queryForList(sqlOwner); // Ambil ulang data
             }
@@ -77,7 +77,6 @@ public class ownerController extends BaseController {
             @RequestParam("idUser") Integer idUser,
             @RequestParam("idOwner") Integer idOwner,
             @RequestParam("nama") String nama,
-            @RequestParam("username") String username,
             @RequestParam("email") String email,
             @RequestParam("kontak") String kontak,
             @RequestParam("kota") String kota,
@@ -85,7 +84,7 @@ public class ownerController extends BaseController {
             if (!isOwner(session)) return "redirect:/login?accessDenied=true";
         
         try {
-            jdbcTemplate.update("UPDATE `user` SET nama = ?, username = ?, email = ? WHERE id_user = ?", nama, username, email, idUser);
+            jdbcTemplate.update("UPDATE `user` SET nama = ?, email = ? WHERE id_user = ?", nama, email, idUser);
             jdbcTemplate.update("UPDATE owner SET kontak = ?, kota = ?, provinsi = ? WHERE id_owner = ?", kontak, kota, provinsi, idOwner);
         } catch (Exception e) {
             e.printStackTrace();
