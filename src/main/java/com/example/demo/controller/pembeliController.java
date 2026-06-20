@@ -45,9 +45,8 @@ public class pembeliController extends BaseController {
             Integer prospekAktif = jdbcTemplate.queryForObject(sqlProspek, Integer.class);
             if (prospekAktif == null) prospekAktif = 0;
 
-
             // --- 2. AMBIL DATA TABEL PEMBELI ---
-            // Menggunakan `user` (dengan backtick) agar aman dari reserved keyword MariaDB
+            // username ditambahkan karena dipakai di HTML (${p.username})
             String sqlTabel = 
                 "SELECT pb.id_pembeli, u.nama, u.email, pb.kontak, " +
                 "(SELECT COUNT(*) FROM penjualan WHERE id_pembeli = pb.id_pembeli AND status = 'Selesai') as total_beli, " +
@@ -57,55 +56,58 @@ public class pembeliController extends BaseController {
                 "ORDER BY pb.id_pembeli DESC";
             List<Map<String, Object>> listPembeli = jdbcTemplate.queryForList(sqlTabel);
 
-            // Mengirimkan data ke HTML
             model.addAttribute("totalPembeli", totalPembeli);
             model.addAttribute("sudahBeli", sudahBeli);
             model.addAttribute("pernahTestDrive", pernahTestDrive);
             model.addAttribute("prospekAktif", prospekAktif);
             model.addAttribute("listPembeli", listPembeli);
 
-            return "redirect:/admin/pembeli";
+            // FIX: sebelumnya "redirect:/admin/pembeli" -> bikin model attribute kebuang
+            // dan render ulang lewat GET tanpa data (infinite-redirect-feel).
+            return "admin/pembeli";
 
         } catch (Exception e) {
             System.err.println("Error saat memuat halaman pembeli: " + e.getMessage());
             e.printStackTrace();
-            return "redirect:/admin/pembeli";
+            model.addAttribute("totalPembeli", 0);
+            model.addAttribute("sudahBeli", 0);
+            model.addAttribute("pernahTestDrive", 0);
+            model.addAttribute("prospekAktif", 0);
+            model.addAttribute("listPembeli", List.of());
+            return "admin/pembeli";
         }
     }
 
     // --- 3. LOGIKA TAMBAH PEMBELI BARU ---
     @PostMapping("/admin/pembeli/tambah")
     public String tambahPembeli(
-                HttpSession session,
+            HttpSession session,
             @RequestParam("nama") String nama,
-            @RequestParam("username") String username,
             @RequestParam("email") String email,
             @RequestParam("kontak") String kontak,
             @RequestParam("password") String password) {
-            if (!isOwner(session)) return "redirect:/login?accessDenied=true";
-        
+        if (!isOwner(session)) return "redirect:/login?accessDenied=true";
+
         try {
-            // 1. Simpan ke tabel user (menggunakan backtick)
-            String sqlUser = "INSERT INTO `user` (nama, username, email, password, role) VALUES (?, ?, ?, ?, 'Pembeli')";
-            jdbcTemplate.update(sqlUser, nama, username, email, password);
-            
-            // 2. Ambil ID User berdasarkan username secara presisi
-            String sqlGetId = "SELECT id_user FROM `user` WHERE username = ?";
-            Integer idUser = jdbcTemplate.queryForObject(sqlGetId, Integer.class, username);
-            
+            // 1. Simpan ke tabel user
+            String sqlUser = "INSERT INTO `user` (nama, email, password, role) VALUES (?, ?, ?, 'Pembeli')";
+            jdbcTemplate.update(sqlUser, nama, email, password);
+
+            // 2. Ambil ID User berdasarkan email secara presisi
+            String sqlGetId = "SELECT id_user FROM `user` WHERE email = ?";
+            Integer idUser = jdbcTemplate.queryForObject(sqlGetId, Integer.class, email);
+
             // 3. Simpan ke tabel pembeli
             if (idUser != null) {
                 String sqlPembeli = "INSERT INTO pembeli (id_user, kontak) VALUES (?, ?)";
                 jdbcTemplate.update(sqlPembeli, idUser, kontak);
             }
-            
+
         } catch (Exception e) {
             System.err.println("===== ERROR TAMBAH PEMBELI =====");
             System.err.println("Pesan Error: " + e.getMessage());
             e.printStackTrace();
         }
-        
-        
 
         return "redirect:/admin/pembeli";
     }
@@ -114,7 +116,7 @@ public class pembeliController extends BaseController {
     @GetMapping("/admin/pembeli/detail/{id}")
     @ResponseBody
     public Map<String, Object> getDetailPembeli(@PathVariable("id") Integer idPembeli, HttpSession session) {
-         if (!isOwner(session)) {
+        if (!isOwner(session)) {
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("message", "Access Denied");
@@ -123,14 +125,12 @@ public class pembeliController extends BaseController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            // 1. Ambil angka statistik
             Integer totalBeli = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM penjualan WHERE id_pembeli = ? AND status = 'Selesai'", Integer.class, idPembeli);
             Integer totalTd = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM testdrive WHERE id_pembeli = ?", Integer.class, idPembeli);
 
             response.put("totalBeli", totalBeli != null ? totalBeli : 0);
             response.put("totalTd", totalTd != null ? totalTd : 0);
 
-            // 2. Ambil riwayat aktivitas (Gabungan dari tabel penjualan dan testdrive menggunakan UNION)
             String sqlAktivitas = 
                 "SELECT * FROM (" +
                 "  SELECT p.tanggal, k.merk, k.model, p.status, 'Beli' as jenis " +
@@ -142,9 +142,9 @@ public class pembeliController extends BaseController {
                 "  WHERE td.id_pembeli = ? " +
                 ") AS riwayat " +
                 "ORDER BY tanggal DESC";
-            
+
             List<Map<String, Object>> activities = jdbcTemplate.queryForList(sqlAktivitas, idPembeli, idPembeli);
-            
+
             response.put("activities", activities);
             response.put("success", true);
 

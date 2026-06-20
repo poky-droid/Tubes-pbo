@@ -52,6 +52,18 @@ public String updateStatus(
             jdbcTemplate.update(sqlKendaraan, idKendaraan);
         }
 
+        // Jika transaksi disetujui, ubah status kendaraan
+        if ("Ditolak".equals(status)) {
+
+            String sqlKendaraan = """
+                UPDATE kendaraan
+                SET status = 'Tersedia'
+                WHERE id_kendaraan = ?
+            """;
+
+            jdbcTemplate.update(sqlKendaraan, idKendaraan);
+        }
+
         return "redirect:/admin/penjualan";
 
     } catch (Exception e) {
@@ -171,25 +183,25 @@ public String updateStatus(
         return "redirect:/admin/penjualan";
     }
 
-    @PostMapping("/admin/penjualan/updateStatus")
-    public String updateStatusPenjualan(
-            @RequestParam("idPenjualan") Integer idPenjualan,
-            @RequestParam("status") String status,
-            @RequestParam("idKendaraan") Integer idKendaraan,
-            HttpSession session) {
-        if (!isOwner(session)) return "redirect:/login?accessDenied=true";
+    // @PostMapping("/admin/penjualan/updateStatus")
+    // public String updateStatusPenjualan(
+    //         @RequestParam("idPenjualan") Integer idPenjualan,
+    //         @RequestParam("status") String status,
+    //         @RequestParam("idKendaraan") Integer idKendaraan,
+    //         HttpSession session) {
+    //     if (!isOwner(session)) return "redirect:/login?accessDenied=true";
 
-        try {
-            jdbcTemplate.update("UPDATE penjualan SET status = ? WHERE id_penjualan = ?", status, idPenjualan);
+    //     try {
+    //         jdbcTemplate.update("UPDATE penjualan SET status = ? WHERE id_penjualan = ?", status, idPenjualan);
 
-            if ("Selesai".equalsIgnoreCase(status)) {
-                jdbcTemplate.update("UPDATE kendaraan SET status = 'Terjual' WHERE id_kendaraan = ?", idKendaraan);
-            } else if ("Ditolak".equalsIgnoreCase(status)) {
-                jdbcTemplate.update("UPDATE kendaraan SET status = 'Tersedia' WHERE id_kendaraan = ?", idKendaraan);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "redirect:/admin/penjualan";
-    }
+    //         if ("Selesai".equalsIgnoreCase(status)) {
+    //             jdbcTemplate.update("UPDATE kendaraan SET status = 'Terjual' WHERE id_kendaraan = ?", idKendaraan);
+    //         } else if ("Ditolak".equalsIgnoreCase(status)) {
+    //             jdbcTemplate.update("UPDATE kendaraan SET status = 'Tersedia' WHERE id_kendaraan = ?", idKendaraan);
+    //         }
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //     }
+    //     return "redirect:/admin/penjualan";
+    // }
 }

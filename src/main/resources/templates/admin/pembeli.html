@@ -8,7 +8,6 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
   <link href="/css/style10.css" rel="stylesheet"/>
   <style>
-    /* Menggunakan trik padding konten agar tidak dempet */
     .content { padding: 32px 40px !important; overflow-x: hidden; }
   </style>
 </head>
@@ -42,7 +41,6 @@
           <thead>
             <tr>
               <th>Pembeli</th>
-              <th>Username</th>
               <th>Kontak</th>
               <th>Total Pembelian</th>
               <th>Test Drive</th>
@@ -51,7 +49,7 @@
             </tr>
           </thead>
           <tbody>
-            
+
             <tr th:each="p : ${listPembeli}">
               <td>
                 <div class="d-flex align-items-center gap-2">
@@ -63,24 +61,22 @@
                   </div>
                 </div>
               </td>
-              
-              <td style="color:var(--muted)" th:text="'@' + ${p.username}">@username</td>
-              
+
               <td style="font-size:12px" th:text="${p.kontak != null and p.kontak != '' ? p.kontak : '-'}">0812-xxxx</td>
-              
+
               <td style="color:var(--gold)" th:text="${p.total_beli} + ' unit'">0 unit</td>
               <td th:text="${p.total_td} + 'x'">0x</td>
-              
+
               <td>
                 <span th:if="${p.total_beli > 0}" class="b-status b-acc">Pembeli</span>
                 <span th:if="${p.total_beli == 0}" class="b-status b-testdrive">Prospek</span>
               </td>
-              
+
               <td><button class="btn-og" style="font-size:11px;padding:4px 10px" th:attr="onclick='openDetail(' + ${p.id_pembeli} + ', \'' + ${p.nama} + '\')'">Detail</button></td>
             </tr>
-            
+
             <tr th:if="${#lists.isEmpty(listPembeli)}">
-              <td colspan="7" class="text-center" style="color:var(--muted); padding: 40px 0;">Belum ada data pembeli terdaftar.</td>
+              <td colspan="6" class="text-center" style="color:var(--muted); padding: 40px 0;">Belum ada data pembeli terdaftar.</td>
             </tr>
 
           </tbody>
@@ -95,13 +91,12 @@
 <div class="modal-overlay" id="modalPembeli">
   <div class="modal-box">
     <div class="modal-title">Tambah Pembeli</div>
-    <form action="/pembeli/tambah" method="POST">
+    <form action="/admin/pembeli/tambah" method="POST">
       <div class="row g-3">
         <div class="col-6"><label class="lbl">Nama Lengkap</label><input name="nama" class="form-c" placeholder="Nama pembeli" required/></div>
-        <div class="col-6"><label class="lbl">Username</label><input name="username" class="form-c" placeholder="@username" required/></div>
         <div class="col-6"><label class="lbl">Email</label><input name="email" class="form-c" type="email" placeholder="email@domain.com" required/></div>
         <div class="col-6"><label class="lbl">No. HP</label><input name="kontak" class="form-c" placeholder="08xx-xxxx-xxxx" required/></div>
-        <div class="col-12"><label class="lbl">Password</label><input name="password" class="form-c" type="password" placeholder="Password akun pembeli" required/></div>
+        <div class="col-6"><label class="lbl">Password</label><input name="password" class="form-c" type="password" placeholder="Password akun pembeli" required/></div>
       </div>
       <div class="d-flex gap-2 mt-4 justify-content-end">
         <button type="button" class="btn-red" onclick="closeModal()">Batal</button>
@@ -115,12 +110,12 @@
   <div class="modal-box">
     <div class="modal-title" id="detailNama">Detail Pembeli</div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Riwayat aktivitas pembeli di showroom</div>
-    
+
     <div class="row g-2 mb-3">
       <div class="col-6"><div style="background:var(--dark-4);border-radius:8px;padding:12px;text-align:center"><div class="s-val" id="detTotalBeli" style="font-family:'Bebas Neue';font-size:22px;color:var(--gold)">0</div><div style="font-size:11px;color:var(--muted)">Unit Dibeli</div></div></div>
       <div class="col-6"><div style="background:var(--dark-4);border-radius:8px;padding:12px;text-align:center"><div class="s-val" id="detTotalTd" style="font-family:'Bebas Neue';font-size:22px;color:var(--blue)">0</div><div style="font-size:11px;color:var(--muted)">Test Drive</div></div></div>
     </div>
-    
+
     <div id="detailActivityList" style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
        </div>
 
@@ -135,7 +130,6 @@
 <script>
   renderSidebar('pembeli.html');
 
-  // Fitur Pencarian
   document.getElementById('searchInput').addEventListener('input', function() {
     const q = this.value.toLowerCase();
     document.querySelectorAll('#tabelPembeli tbody tr').forEach(row => {
@@ -143,44 +137,35 @@
     });
   });
 
-  // Fungsi Buka/Tutup Modal Tambah
   function openModal()  { document.getElementById('modalPembeli').classList.add('show'); }
   function closeModal() { document.getElementById('modalPembeli').classList.remove('show'); }
   document.getElementById('modalPembeli').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
 
-  // Fungsi Buka/Tutup Modal Detail
   function closeDetail() { document.getElementById('modalDetail').classList.remove('show'); }
   document.getElementById('modalDetail').addEventListener('click', e => { if(e.target===e.currentTarget) closeDetail(); });
 
-  // Fungsi Utama AJAX untuk Menarik Riwayat Pembeli
   async function openDetail(id, nama) {
-    // Tampilkan modal dan set nama
     document.getElementById('detailNama').textContent = nama;
     document.getElementById('modalDetail').classList.add('show');
-    
-    // Setel efek loading sementara
+
     document.getElementById('detTotalBeli').textContent = '...';
     document.getElementById('detTotalTd').textContent = '...';
     document.getElementById('detailActivityList').innerHTML = '<div class="text-center" style="color:var(--muted); font-size:12px; padding:20px;">Memuat data...</div>';
 
     try {
-      // Menarik data dari Endpoint Java
-      const response = await fetch('/pembeli/detail/' + id);
+      const response = await fetch('/admin/pembeli/detail/' + id);
       const data = await response.json();
 
       if (data.success) {
-        // Update angka statistik di dalam kotak
         document.getElementById('detTotalBeli').textContent = data.totalBeli;
         document.getElementById('detTotalTd').textContent = data.totalTd;
 
-        // Merangkai HTML riwayat
         let actHtml = '';
         if (data.activities && data.activities.length > 0) {
           data.activities.forEach(act => {
-            // Tentukan warna dan teks berdasarkan tipe aktivitas
             let dotColor = act.jenis === 'Beli' ? 'green' : 'blue';
             let actionText = act.jenis === 'Beli' ? (act.status === 'Selesai' ? 'Membeli' : 'Memesan') : 'Test Drive';
-            
+
             actHtml += `
             <div class="act-item">
               <div class="act-dot ${dotColor}"></div>
@@ -193,8 +178,7 @@
         } else {
           actHtml = '<div class="text-center" style="color:var(--muted); font-size:12px; padding:20px;">Belum ada riwayat aktivitas.</div>';
         }
-        
-        // Suntikkan HTML ke dalam modal
+
         document.getElementById('detailActivityList').innerHTML = actHtml;
       } else {
         document.getElementById('detailActivityList').innerHTML = '<div class="text-center" style="color:var(--red); font-size:12px; padding:20px;">Gagal memuat: ' + data.message + '</div>';
