@@ -191,7 +191,7 @@ CREATE TABLE `user` (
 
 INSERT INTO `user` (`id_user`, `nama`, `email`, `password`, `role`) VALUES
 (2, 'jopan', 'jopan@gmail.com', '1234567890', 'Pembeli'),
-(3, 'jopan', 'nivea@hahaha.digital', '1234567890', 'Pembeli'),
+(3, 'angga', 'nivea@hahaha.digital', '1234567890', 'Pembeli'),
 (4, 'Admin Owner', 'owner@autoprime.id', '12345', 'Owner');
 
 --
