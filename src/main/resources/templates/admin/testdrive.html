@@ -250,7 +250,7 @@
   let fpInstance = null;
 
   const idKendaraanSelect = document.querySelector('#modalTD select[name="idKendaraan"]');
-  const jamSelect = document.querySelector('#modalTD select[name="jam"]');
+  const jamSelect = document.querySelector('#modalTD input[name="jam"]');
   const dateInput = document.querySelector('#modalTD input[name="tanggal"]');
 
   // Ganti input type="time" ke select statis
@@ -337,6 +337,17 @@
   if (idKendaraanSelect) {
       idKendaraanSelect.addEventListener('change', (e) => fetchBookedData(e.target.value));
   }
+
+  // Buka modal => ambil data berdasarkan kendaraan terpilih
+  const originalOpenModal = openModal;
+  window.openModal = function() {
+      originalOpenModal();
+      if (idKendaraanSelect && idKendaraanSelect.value) {
+          fetchBookedData(idKendaraanSelect.value);
+      } else {
+          fetchBookedData();
+      }
+  };
 </script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </body>
