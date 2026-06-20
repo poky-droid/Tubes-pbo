@@ -283,9 +283,9 @@
 
 <nav class="ap-nav">
     <div class="nav-inner">
-        <a href="/buyer/home" class="nav-logo">Artomoro Showroom</a>
+        <a href="/" class="nav-logo">Artomoro Showroom</a>
         <div class="nav-links">
-            <a href="/buyer/home" class="nav-active">&#9783; Katalog</a>
+            <a href="/" class="nav-active">&#9783; Katalog</a>
             <a href="/buyer/testdrive">&#128197; Test Drive</a>
             <a href="/buyer/pesanan">&#128722; Pesanan</a>
             <a href="/buyer/profil">&#128100; Profil</a>
@@ -300,7 +300,7 @@
 <div class="container">
 
     <div class="breadcrumb">
-        <a th:href="@{/buyer/home}">&#8592; Kembali ke Katalog</a>
+        <a th:href="@{/}">&#8592; Kembali ke Katalog</a>
         /
         <span th:text="${kendaraan['merk']} + ' ' + ${kendaraan['model']}"></span>
     </div>
@@ -352,7 +352,7 @@
                 <div class="price">
                     Rp
                     <span th:text="${#numbers.formatDecimal(kendaraan['harga'],0,'COMMA',0,'POINT')}"></span>
-                    / Hari
+                    
                 </div>
 
                 <div class="status tersedia"
@@ -451,23 +451,28 @@
 
                 <div class="actions">
 
-                    <a th:if="${#strings.equalsIgnoreCase(kendaraan['status'],'Tersedia') or #strings.equalsIgnoreCase(kendaraan['status'],'Test Drive')}"
-                       th:href="@{/buyer/testdrive(kendaraan=${kendaraan['id_kendaraan']})}"
-                       class="btn btn-primary">
-                        Jadwalkan Test Drive
-                    </a>
+                <form th:if="${#strings.equalsIgnoreCase(kendaraan['status'],'Tersedia') or #strings.equalsIgnoreCase(kendaraan['status'],'Test Drive')}"
+                    th:action="@{/buyer/pesan}"
+                    method="post"
+                    onsubmit="return confirm('Yakin ingin memesan kendaraan ini?');"
+                    style="flex:1">
+                    <input type="hidden" name="idKendaraan" th:value="${kendaraan['id_kendaraan']}">
+                    <button type="submit" class="btn btn-primary" style="width:100%">
+                        Pesan
+                    </button>
+                </form>
 
-                    <a th:unless="${#strings.equalsIgnoreCase(kendaraan['status'],'Tersedia') or #strings.equalsIgnoreCase(kendaraan['status'],'Test Drive')}"
-                       class="btn btn-disabled">
-                        Tidak Tersedia untuk Test Drive
-                    </a>
+                <a th:unless="${#strings.equalsIgnoreCase(kendaraan['status'],'Tersedia') or #strings.equalsIgnoreCase(kendaraan['status'],'Test Drive')}"
+                class="btn btn-disabled">
+                    Tidak Tersedia untuk Test Drive
+                </a>
 
-                    <a th:href="@{/buyer/home}"
-                       class="btn btn-secondary">
-                        Kembali
-                    </a>
+                <a th:href="@{/}"
+                class="btn btn-secondary">
+                    Kembali
+                </a>
 
-                </div>
+            </div>
 
             </div>
 

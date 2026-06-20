@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -211,11 +212,13 @@ public class testdriveController  extends BaseController {
             int rowsAffected = jdbcTemplate.update(sql, 
                 idPembeli, idKendaraan, tanggal, jam, catatan, idOwner,
                 idKendaraan, tanggal, jam);
+               
 
             if (rowsAffected == 0) {
                 // Booking gagal karena jadwal sudah ada yang ambil
                 return "redirect:/buyer/testdrive?error=conflict&kendaraan=" + idKendaraan;
             }
+
 
             System.out.println("Jadwal test drive berhasil dibuat untuk pembeli " + idPembeli);
 

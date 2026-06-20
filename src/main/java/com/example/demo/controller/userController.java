@@ -239,10 +239,10 @@ public class userController extends user  {
             return "buyer-testdrive";
         }
     }
+    
 
-    // ── Halaman Pesanan Pembeli ───────────────────────────────────────────
-    @GetMapping("/buyer/pesanan")
-    public String buyerPesanan(Model model, HttpSession session) {
+        @GetMapping("/buyer/pesanan")
+public String buyerPesanan(Model model, HttpSession session) {
     Integer idPembeli = (Integer) session.getAttribute("id_pembeli");
     if (idPembeli == null) return "redirect:/login?sessionExpired=true";
 
@@ -250,28 +250,27 @@ public class userController extends user  {
         model.addAttribute("nama", session.getAttribute("nama"));
 
         String sqlPesanan =
-            "SELECT p.id_penjualan, p.id_kendaraan, p.total_harga, " +
-            "p.tanggal, p.status FROM penjualan p " +
+            "SELECT p.id_penjualan, p.id_kendaraan AS idKendaraan, " +
+            "k.harga AS totalHarga, p.tanggal, p.status " +
+            "FROM penjualan p " +
+            "JOIN kendaraan k ON k.id_kendaraan = p.id_kendaraan " +
             "WHERE p.id_pembeli = ? ORDER BY p.tanggal DESC";
         List<Map<String, Object>> pesanan = jdbcTemplate.queryForList(sqlPesanan, idPembeli);
 
-        // Format tanggal sebelum masuk model
         for (Map<String, Object> p : pesanan) {
-            if (p.get("tanggal") instanceof java.sql.Date) {
-                java.sql.Date tgl = (java.sql.Date) p.get("tanggal");
-                p.put("tanggal_str", tgl.toLocalDate()
-                    .format(java.time.format.DateTimeFormatter
-                        .ofPattern("dd MMMM yyyy", new java.util.Locale("id", "ID"))));
+            Object tglObj = p.get("tanggal");
+            if (tglObj instanceof java.sql.Date) {
+                p.put("tanggal", ((java.sql.Date) tglObj).toLocalDate());
             }
         }
+
         model.addAttribute("pesanan", pesanan);
 
-        // Fix: key pakai Long bukan Integer
         String sqlKendaraan = "SELECT id_kendaraan, merk, model, harga FROM kendaraan";
         List<Map<String, Object>> kendaraanList = jdbcTemplate.queryForList(sqlKendaraan);
         Map<Long, Map<String, Object>> kendaraanMap = new HashMap<>();
         for (Map<String, Object> k : kendaraanList) {
-            kendaraanMap.put((Long) k.get("id_kendaraan"), k);
+            kendaraanMap.put(((Number) k.get("id_kendaraan")).longValue(), k);
         }
         model.addAttribute("kendaraanMap", kendaraanMap);
 
@@ -286,6 +285,7 @@ public class userController extends user  {
         return "buyer-pesanan";
     }
 }
+
     // ── Halaman Profil Pembeli ────────────────────────────────────────────
     @GetMapping("/buyer/profil")
     public String buyerProfil(Model model, HttpSession session) {

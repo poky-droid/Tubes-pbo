@@ -167,10 +167,10 @@
                             </div>
                             <div class="tl-meta">
                                 <i class="bi bi-calendar3"></i>
-                                <span th:text="${td['tanggal_str']}"></span>
+                                <span th:text="${T(java.lang.String).valueOf(td['tanggal'])}"></span>
                                 &nbsp;&bull;&nbsp;
                                 <i class="bi bi-clock"></i>
-                                <span th:text="${td['jam_str'] + ' WIB'}"></span>
+                                <span th:text="${T(java.lang.String).valueOf(td['jam']).substring(0,5) + ' WIB'}"></span>
                             </div>
                             <div class="tl-meta"
                                  th:if="${td['catatan'] != null and !#strings.isEmpty(td['catatan'])}"

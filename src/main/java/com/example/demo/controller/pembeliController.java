@@ -49,7 +49,7 @@ public class pembeliController extends BaseController {
             // --- 2. AMBIL DATA TABEL PEMBELI ---
             // Menggunakan `user` (dengan backtick) agar aman dari reserved keyword MariaDB
             String sqlTabel = 
-                "SELECT pb.id_pembeli, u.nama, u.username, u.email, pb.kontak, " +
+                "SELECT pb.id_pembeli, u.nama, u.email, pb.kontak, " +
                 "(SELECT COUNT(*) FROM penjualan WHERE id_pembeli = pb.id_pembeli AND status = 'Selesai') as total_beli, " +
                 "(SELECT COUNT(*) FROM testdrive WHERE id_pembeli = pb.id_pembeli) as total_td " +
                 "FROM pembeli pb " +
@@ -64,12 +64,12 @@ public class pembeliController extends BaseController {
             model.addAttribute("prospekAktif", prospekAktif);
             model.addAttribute("listPembeli", listPembeli);
 
-            return "/admin/pembeli"; 
+            return "redirect:/admin/pembeli";
 
         } catch (Exception e) {
             System.err.println("Error saat memuat halaman pembeli: " + e.getMessage());
             e.printStackTrace();
-            return "/admin/pembeli"; 
+            return "redirect:/admin/pembeli";
         }
     }
 

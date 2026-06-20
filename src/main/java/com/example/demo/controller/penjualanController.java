@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -17,6 +18,47 @@ public class penjualanController extends BaseController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @PostMapping("/penjualan/updateStatus")
+public String updateStatus(
+        @RequestParam("idPenjualan") Integer idPenjualan,
+        @RequestParam("idKendaraan") Integer idKendaraan,
+        @RequestParam("status") String status,
+        HttpSession session) {
+
+    if (!isOwner(session)) {
+        return "redirect:/login?accessDenied=true";
+    }
+
+    try {
+
+        // Update status penjualan
+        String sql = """
+            UPDATE penjualan
+            SET status = ?
+            WHERE id_penjualan = ?
+        """;
+
+        jdbcTemplate.update(sql, status, idPenjualan);
+
+        // Jika transaksi disetujui, ubah status kendaraan
+        if ("Selesai".equals(status)) {
+
+            String sqlKendaraan = """
+                UPDATE kendaraan
+                SET status = 'Terjual'
+                WHERE id_kendaraan = ?
+            """;
+
+            jdbcTemplate.update(sqlKendaraan, idKendaraan);
+        }
+
+        return "redirect:/admin/penjualan";
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return "redirect:/admin/penjualan?error=true";
+    }
+}
 
     @GetMapping("/admin/penjualan")
     public String showPenjualan(Model model, HttpSession session) {

@@ -1,36 +1,36 @@
 package com.example.demo.model;
 
+import java.time.LocalDate;
+
 public class penjualan {
-    private int idPenjualan;
-    private int tanggalPenjualan;
-    private boolean statusPenjualan;
+    private Long idPenjualan;
+    private LocalDate tanggal;
+    private String status;
+    private Long idPembeli;
+    private Long idKendaraan;
+    private Long idOwner;
+    private Double totalHarga;
 
-    public penjualan(int idPenjualan, int tanggalPenjualan, boolean statusPenjualan) {
-        this.idPenjualan = idPenjualan;
-        this.tanggalPenjualan = tanggalPenjualan;
-        this.statusPenjualan = statusPenjualan;
-    }
+    public penjualan() {}
 
-    public int getIdPenjualan() {
-        return idPenjualan;
-    }
-    public int getTanggalPenjualan() {
-        return tanggalPenjualan;
-    }
-    public boolean isStatusPenjualan() {
-        return statusPenjualan;
-    }
+    public Long getIdPenjualan() { return idPenjualan; }
+    public void setIdPenjualan(Long idPenjualan) { this.idPenjualan = idPenjualan; }
 
-        public void setIdPenjualan(int idPenjualan) {
-            this.idPenjualan = idPenjualan;
-        }
-        public void setTanggalPenjualan(int tanggalPenjualan) {
-            this.tanggalPenjualan = tanggalPenjualan;
-        }
-        public void setStatusPenjualan(boolean statusPenjualan) {
-            this.statusPenjualan = statusPenjualan;
-        }
+    public LocalDate getTanggal() { return tanggal; }
+    public void setTanggal(LocalDate tanggal) { this.tanggal = tanggal; }
 
-        
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
+    public Long getIdPembeli() { return idPembeli; }
+    public void setIdPembeli(Long idPembeli) { this.idPembeli = idPembeli; }
+
+    public Long getIdKendaraan() { return idKendaraan; }
+    public void setIdKendaraan(Long idKendaraan) { this.idKendaraan = idKendaraan; }
+
+    public Long getIdOwner() { return idOwner; }
+    public void setIdOwner(Long idOwner) { this.idOwner = idOwner; }
+
+    public Double getTotalHarga() { return totalHarga; }
+    public void setTotalHarga(Double totalHarga) { this.totalHarga = totalHarga; }
 }

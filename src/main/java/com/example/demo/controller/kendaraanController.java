@@ -36,6 +36,52 @@ public class kendaraanController {
     private static final String UPLOAD_DIR = System.getProperty("user.dir") + File.separator + "uploads" + File.separator + "kendaraan" + File.separator;
 
 
+
+    // ===== POST: submit pesanan =====
+        @PostMapping("/buyer/pesan")
+        public String pesanKendaraanSubmit(
+                HttpSession session,
+                @RequestParam("idKendaraan") Integer idKendaraan) {
+
+            Integer idPembeli = (Integer) session.getAttribute("id_pembeli");
+            if (idPembeli == null) return "redirect:/login?sessionExpired=true";
+
+            try {
+                Integer idOwner = null;
+                try {
+                    idOwner = jdbcTemplate.queryForObject(
+                        "SELECT id_owner FROM owner LIMIT 1", Integer.class);
+                } catch (Exception ex) {
+                    System.err.println("Tidak ada data owner: " + ex.getMessage());
+                }
+
+                String cekStatus = jdbcTemplate.queryForObject(
+                    "SELECT status FROM kendaraan WHERE id_kendaraan = ?",
+                    String.class, idKendaraan);
+
+                if (!"Tersedia".equalsIgnoreCase(cekStatus) && !"Test Drive".equalsIgnoreCase(cekStatus)) {
+                    return "redirect:/?error=conflict";
+                }
+
+                jdbcTemplate.update(
+                    "INSERT INTO penjualan (tanggal, status, id_pembeli, id_kendaraan, id_owner) " +
+                    "VALUES (CURDATE(), 'Pending', ?, ?, ?)",
+                    idPembeli, idKendaraan, idOwner);
+
+                jdbcTemplate.update(
+                    "UPDATE kendaraan SET status = 'Dipesan' WHERE id_kendaraan = ?",
+                    idKendaraan);
+
+            } catch (Exception e) {
+                System.err.println("===== ERROR SUBMIT PESANAN =====");
+                e.printStackTrace();
+                return "redirect:/?error=gagal";
+            }
+
+            return "redirect:/buyer/pesanan?success=true";
+        }
+    
+
     @GetMapping("/buyer/kendaraan/{id}")
     public String detailKendaraan(@PathVariable Long id, Model model, HttpSession session) {
 
