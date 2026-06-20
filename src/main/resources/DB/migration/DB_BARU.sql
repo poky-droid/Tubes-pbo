@@ -180,7 +180,6 @@ INSERT INTO `testdrive` (`id_testdrive`, `tanggal`, `jam`, `status`, `catatan`, 
 CREATE TABLE `user` (
   `id_user` bigint NOT NULL,
   `nama` varchar(100) NOT NULL,
-  `username` varchar(100) NOT NULL,
   `email` varchar(100) DEFAULT NULL,
   `password` varchar(255) NOT NULL,
   `role` varchar(50) DEFAULT NULL
@@ -190,10 +189,10 @@ CREATE TABLE `user` (
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`id_user`, `nama`, `username`, `email`, `password`, `role`) VALUES
-(2, 'jopan', 'jopanbekti', 'jopan@gmail.com', '1234567890', 'Pembeli'),
-(3, 'jopan', 'kreezp', 'nivea@hahaha.digital', '1234567890', 'Pembeli'),
-(4, 'Admin Owner', 'adminowner', 'owner@autoprime.id', '12345', 'Owner');
+INSERT INTO `user` (`id_user`, `nama`, `email`, `password`, `role`) VALUES
+(2, 'jopan', 'jopan@gmail.com', '1234567890', 'Pembeli'),
+(3, 'jopan', 'nivea@hahaha.digital', '1234567890', 'Pembeli'),
+(4, 'Admin Owner', 'owner@autoprime.id', '12345', 'Owner');
 
 --
 -- Indexes for dumped tables
@@ -256,7 +255,7 @@ ALTER TABLE `testdrive`
 --
 ALTER TABLE `user`
   ADD PRIMARY KEY (`id_user`),
-  ADD UNIQUE KEY `username` (`username`);
+  ADD UNIQUE KEY `nama` (`nama`);
 
 --
 -- AUTO_INCREMENT for dumped tables

@@ -52,7 +52,7 @@ public String updateStatus(
             jdbcTemplate.update(sqlKendaraan, idKendaraan);
         }
 
-        // Jika transaksi disetujui, ubah status kendaraan
+        // Jika transaksi ditolak, ubah status kendaraan
         if ("Ditolak".equals(status)) {
 
             String sqlKendaraan = """
