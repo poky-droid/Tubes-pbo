@@ -56,11 +56,11 @@ public class userController extends user  {
             HttpSession session) {
 
         try {
-            // Trim inputs to avoid accidental whitespace
+            // menghapus leading/trailing whitespace untuk mencegah login gagal karena spasi tidak sengaja
             String namaTrim = nama == null ? "" : nama.trim();
             String passTrim = password == null ? "" : password.trim();
 
-            // Debug: log attempt (do not log passwords in production)
+            // Debug: log input values user 
             System.out.println("[LOGIN] attempt for nama='" + namaTrim + "'");
 
             String sql = "SELECT id_user, nama, role FROM `user` WHERE nama = ? AND password = ?";
@@ -119,7 +119,6 @@ public class userController extends user  {
         }
     }
 
-    // If someone hits /loginForm with GET, redirect back to login page instead of throwing 405
     @GetMapping("/loginForm")
     public String loginFormGet() {
         return "redirect:/login";
@@ -242,49 +241,49 @@ public class userController extends user  {
     
 
         @GetMapping("/buyer/pesanan")
-public String buyerPesanan(Model model, HttpSession session) {
-    Integer idPembeli = (Integer) session.getAttribute("id_pembeli");
-    if (idPembeli == null) return "redirect:/login?sessionExpired=true";
+    public String buyerPesanan(Model model, HttpSession session) {
+        Integer idPembeli = (Integer) session.getAttribute("id_pembeli");
+        if (idPembeli == null) return "redirect:/login?sessionExpired=true";
 
-    try {
-        model.addAttribute("nama", session.getAttribute("nama"));
+        try {
+            model.addAttribute("nama", session.getAttribute("nama"));
 
-        String sqlPesanan =
-            "SELECT p.id_penjualan, p.id_kendaraan AS idKendaraan, " +
-            "k.harga AS totalHarga, p.tanggal, p.status " +
-            "FROM penjualan p " +
-            "JOIN kendaraan k ON k.id_kendaraan = p.id_kendaraan " +
-            "WHERE p.id_pembeli = ? ORDER BY p.tanggal DESC";
-        List<Map<String, Object>> pesanan = jdbcTemplate.queryForList(sqlPesanan, idPembeli);
+            String sqlPesanan =
+                "SELECT p.id_penjualan, p.id_kendaraan AS idKendaraan, " +
+                "k.harga AS totalHarga, p.tanggal, p.status " +
+                "FROM penjualan p " +
+                "JOIN kendaraan k ON k.id_kendaraan = p.id_kendaraan " +
+                "WHERE p.id_pembeli = ? ORDER BY p.tanggal DESC";
+            List<Map<String, Object>> pesanan = jdbcTemplate.queryForList(sqlPesanan, idPembeli);
 
-        for (Map<String, Object> p : pesanan) {
-            Object tglObj = p.get("tanggal");
-            if (tglObj instanceof java.sql.Date) {
-                p.put("tanggal", ((java.sql.Date) tglObj).toLocalDate());
+            for (Map<String, Object> p : pesanan) {
+                Object tglObj = p.get("tanggal");
+                if (tglObj instanceof java.sql.Date) {
+                    p.put("tanggal", ((java.sql.Date) tglObj).toLocalDate());
+                }
             }
+
+            model.addAttribute("pesanan", pesanan);
+
+            String sqlKendaraan = "SELECT id_kendaraan, merk, model, harga FROM kendaraan";
+            List<Map<String, Object>> kendaraanList = jdbcTemplate.queryForList(sqlKendaraan);
+            Map<Long, Map<String, Object>> kendaraanMap = new HashMap<>();
+            for (Map<String, Object> k : kendaraanList) {
+                kendaraanMap.put(((Number) k.get("id_kendaraan")).longValue(), k);
+            }
+            model.addAttribute("kendaraanMap", kendaraanMap);
+
+            return "buyer-pesanan";
+
+        } catch (Exception e) {
+            System.err.println("Error memuat halaman pesanan: " + e.getMessage());
+            e.printStackTrace();
+            model.addAttribute("error", "Terjadi kesalahan memuat data pesanan");
+            model.addAttribute("pesanan", new java.util.ArrayList<>());
+            model.addAttribute("kendaraanMap", new HashMap<>());
+            return "buyer-pesanan";
         }
-
-        model.addAttribute("pesanan", pesanan);
-
-        String sqlKendaraan = "SELECT id_kendaraan, merk, model, harga FROM kendaraan";
-        List<Map<String, Object>> kendaraanList = jdbcTemplate.queryForList(sqlKendaraan);
-        Map<Long, Map<String, Object>> kendaraanMap = new HashMap<>();
-        for (Map<String, Object> k : kendaraanList) {
-            kendaraanMap.put(((Number) k.get("id_kendaraan")).longValue(), k);
-        }
-        model.addAttribute("kendaraanMap", kendaraanMap);
-
-        return "buyer-pesanan";
-
-    } catch (Exception e) {
-        System.err.println("Error memuat halaman pesanan: " + e.getMessage());
-        e.printStackTrace();
-        model.addAttribute("error", "Terjadi kesalahan memuat data pesanan");
-        model.addAttribute("pesanan", new java.util.ArrayList<>());
-        model.addAttribute("kendaraanMap", new HashMap<>());
-        return "buyer-pesanan";
     }
-}
 
     // ── Halaman Profil Pembeli ────────────────────────────────────────────
     @GetMapping("/buyer/profil")
@@ -431,7 +430,6 @@ public String buyerPesanan(Model model, HttpSession session) {
     public Map<String, Boolean> checkUsername(@RequestParam("username") String username) {
         Map<String, Boolean> result = new HashMap<>();
         try {
-            // The register form uses the email input as the 'username' field, so check email uniqueness
             Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM user WHERE email = ?", Integer.class, username);
             result.put("taken", count != null && count > 0);

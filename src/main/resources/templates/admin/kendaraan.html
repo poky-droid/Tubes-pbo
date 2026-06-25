@@ -167,7 +167,7 @@
           </div>
 
           <div class="d-flex gap-2 mt-3">
-            <button class="btn-og flex-fill" style="font-size:11px;padding:5px 8px;">Detail</button>
+            <a th:href="@{/admin/kendaraan/detail/{id}(id=${k.id_kendaraan})}" class="btn-og flex-fill" style="font-size:11px;padding:5px 8px;text-decoration:none;text-align:center;">Detail</a>
             <a th:href="@{/admin/kendaraan/hapus/{id}(id=${k.id_kendaraan})}"
                class="btn-red flex-fill"
                style="font-size:11px; padding:5px 8px; text-decoration:none; text-align:center;"

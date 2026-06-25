@@ -120,8 +120,8 @@ public class testdriveController  extends BaseController {
                 "SELECT ?, ?, ?, ?, ?, ? FROM DUAL " +
                 "WHERE NOT EXISTS (" +
                 "   SELECT 1 FROM testdrive " +
-                "   WHERE id_kendaraan = ? AND tanggal = ? AND jam = ? " +
-                "   AND status IN ('Pending', 'Aktif', 'Terkonfirmasi')" +
+                "   WHERE id_kendaraan = ? AND tanggal = ? AND jam = CAST(CONCAT(?, ':00') AS TIME) " +
+                "   AND status NOT IN ('Ditolak', 'Dibatalkan')" +
                 ")";
             
             int rowsAffected = jdbcTemplate.update(sql, 
@@ -205,8 +205,8 @@ public class testdriveController  extends BaseController {
                 "SELECT ?, ?, ?, ?, 'Pending', ?, ? FROM DUAL " +
                 "WHERE NOT EXISTS (" +
                 "   SELECT 1 FROM testdrive " +
-                "   WHERE id_kendaraan = ? AND tanggal = ? AND jam = ? " +
-                "   AND status IN ('Pending', 'Aktif', 'Terkonfirmasi')" +
+                "   WHERE id_kendaraan = ? AND tanggal = ? AND jam = CAST(CONCAT(?, ':00') AS TIME) " +
+                "   AND status NOT IN ('Ditolak', 'Dibatalkan')" +
                 ")";
             
             int rowsAffected = jdbcTemplate.update(sql, 
@@ -234,9 +234,14 @@ public class testdriveController  extends BaseController {
     // --- API UNTUK MENGAMBIL SLOT JADWAL YANG SUDAH DIBOOKING ---
     @GetMapping("/api/testdrive/booked")
     @ResponseBody
-    public List<Map<String, Object>> getBookedSlots(@RequestParam("idKendaraan") Integer idKendaraan) {
-        String sql = "SELECT tanggal, jam FROM testdrive WHERE id_kendaraan = ? AND status IN ('Pending', 'Aktif', 'Terkonfirmasi')";
-        return jdbcTemplate.queryForList(sql, idKendaraan);
+    public List<Map<String, Object>> getBookedSlots(@RequestParam(value = "idKendaraan", required = false) Integer idKendaraan) {
+        if (idKendaraan != null) {
+            String sql = "SELECT DATE_FORMAT(tanggal, '%Y-%m-%d') as tanggal, TIME_FORMAT(jam, '%H:%i') as jam FROM testdrive WHERE id_kendaraan = ? AND status NOT IN ('Ditolak', 'Dibatalkan')";
+            return jdbcTemplate.queryForList(sql, idKendaraan);
+        } else {
+            String sql = "SELECT DATE_FORMAT(tanggal, '%Y-%m-%d') as tanggal, TIME_FORMAT(jam, '%H:%i') as jam FROM testdrive WHERE status NOT IN ('Ditolak', 'Dibatalkan')";
+            return jdbcTemplate.queryForList(sql);
+        }
     }
 
 }
