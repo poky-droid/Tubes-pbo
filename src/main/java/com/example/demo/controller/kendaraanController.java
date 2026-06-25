@@ -35,7 +35,6 @@ public class kendaraanController extends BaseController {
 
     private static final String UPLOAD_DIR = System.getProperty("user.dir") + File.separator + "uploads" + File.separator + "kendaraan" + File.separator;
 
-
     @GetMapping("/buyer/kendaraan/{id}")
     public String detailKendaraan(@PathVariable Long id, Model model) {
 
@@ -77,6 +76,7 @@ public class kendaraanController extends BaseController {
 
         return "buyer-kendaraan-detail";
     }
+    
 
     // public boolean isOwner(HttpSession session) {
     //     String role = (String) session.getAttribute("role");
