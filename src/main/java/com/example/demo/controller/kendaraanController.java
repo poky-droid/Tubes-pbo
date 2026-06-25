@@ -28,7 +28,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
-public class kendaraanController {
+public class kendaraanController extends BaseController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -78,10 +78,10 @@ public class kendaraanController {
         return "buyer-kendaraan-detail";
     }
 
-    public boolean isOwner(HttpSession session) {
-        String role = (String) session.getAttribute("role");
-        return role != null && role.equalsIgnoreCase("owner");
-    }
+    // public boolean isOwner(HttpSession session) {
+    //     String role = (String) session.getAttribute("role");
+    //     return role != null && role.equalsIgnoreCase("owner");
+    // }
 
    
     
@@ -229,6 +229,49 @@ public class kendaraanController {
         redirectAttributes.addFlashAttribute("success", "Kendaraan berhasil ditambahkan.");
         return "redirect:/admin/kendaraan";
     }
+    @PostMapping("/buyer/pesan")
+        public String pesanKendaraanSubmit(
+                HttpSession session,
+                @RequestParam("idKendaraan") Integer idKendaraan) {
+
+            Integer idPembeli = (Integer) session.getAttribute("id_pembeli");
+            if (idPembeli == null) return "redirect:/login?sessionExpired=true";
+
+            try {
+                Integer idOwner = null;
+                try {
+                    idOwner = jdbcTemplate.queryForObject(
+                        "SELECT id_owner FROM owner LIMIT 1", Integer.class);
+                } catch (Exception ex) {
+                    System.err.println("Tidak ada data owner: " + ex.getMessage());
+                }
+
+                String cekStatus = jdbcTemplate.queryForObject(
+                    "SELECT status FROM kendaraan WHERE id_kendaraan = ?",
+                    String.class, idKendaraan);
+
+                if (!"Tersedia".equalsIgnoreCase(cekStatus) && !"Test Drive".equalsIgnoreCase(cekStatus)) {
+                    return "redirect:/?error=conflict";
+                }
+
+                jdbcTemplate.update(
+                    "INSERT INTO penjualan (tanggal, status, id_pembeli, id_kendaraan, id_owner) " +
+                    "VALUES (CURDATE(), 'Pending', ?, ?, ?)",
+                    idPembeli, idKendaraan, idOwner);
+
+                jdbcTemplate.update(
+                    "UPDATE kendaraan SET status = 'Dipesan' WHERE id_kendaraan = ?",
+                    idKendaraan);
+
+            } catch (Exception e) {
+                System.err.println("===== ERROR SUBMIT PESANAN =====");
+                e.printStackTrace();
+                return "redirect:/?error=gagal";
+            }
+
+            return "redirect:/buyer/pesanan?success=true";
+        }
+
 
     // ✅ BARU: tampilkan halaman detail admin (yang dipanggil tombol "Detail" di list)
     @GetMapping("/admin/kendaraan/detail/{id}")
